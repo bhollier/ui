@@ -1,0 +1,30 @@
+<LinearLayout
+        xmlns:builtin="http://github.com/orfby/ui/api/schema"
+        builtin:width="match_parent"
+        builtin:height="match_parent"
+        builtin:orientation="vertical">
+    <Button
+            builtin:width="match_parent"
+            builtin:height="17%"
+            builtin:bkg-default="#FF0000"/>
+    <Button
+            builtin:width="match_parent"
+            builtin:height="17%"
+            builtin:bkg-default="#ffa500"/>
+    <Button
+            builtin:width="match_parent"
+            builtin:height="17%"
+            builtin:bkg-default="#ffff00"/>
+    <Button
+            builtin:width="match_parent"
+            builtin:height="17%"
+            builtin:bkg-default="#008000"/>
+    <Button
+            builtin:width="match_parent"
+            builtin:height="17%"
+            builtin:bkg-default="#0000ff"/>
+    <Button
+            builtin:width="match_parent"
+            builtin:height="17%"
+            builtin:bkg-default="#4b0082"/>
+</LinearLayout>

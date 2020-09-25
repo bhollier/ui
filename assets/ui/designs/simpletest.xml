@@ -1,0 +1,11 @@
+<LinearLayout
+        xmlns:builtin="http://github.com/orfby/ui/api/schema"
+        builtin:width="match_parent"
+        builtin:height="match_parent"
+        builtin:background="./assets/ui/images/scalebkg-50px.png"
+        builtin:bkg-repeat="true">
+    <Image
+            builtin:width="100px"
+            builtin:height="100px"
+            builtin:source="./assets/ui/images/frog.png"/>
+</LinearLayout>

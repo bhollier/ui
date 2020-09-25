@@ -1,0 +1,34 @@
+<GridLayout
+        xmlns:builtin="http://github.com/orfby/ui/api/schema"
+        width="match_content"
+        builtin:height="match_parent"
+        builtin:gravity="right"
+        builtin:columns="2"
+        builtin:background="./assets/ui/images/scalebkg-50px.png"
+        builtin:bkg-repeat="true">
+    <Image
+            builtin:width="100px"
+            builtin:height="100px"
+            builtin:gravity="center"
+            builtin:background="#00000055"
+            builtin:source="./assets/ui/images/frog.png"/>
+    <TextButton
+            builtin:width="100px"
+            builtin:height="50px"
+            builtin:gravity="center"
+            builtin:background="#FF0000"
+            builtin:bkg-hovered="#FFFF00"
+            builtin:bkg-pressed="#00FF00"
+            builtin:text="button"
+            builtin:text-size="24"
+            builtin:press-callback="testcallback"/>
+    <ImageButton
+            builtin:width="100px"
+            builtin:height="100px"
+            builtin:gravity="center"
+            builtin:background="#FF0000"
+            builtin:bkg-hovered="#FFFF00"
+            builtin:bkg-pressed="#00FF00"
+            builtin:source="./assets/ui/images/frog.png"
+            builtin:press-callback="testcallback"/>
+</GridLayout>

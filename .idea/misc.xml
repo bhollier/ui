@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="JavaScriptSettings">
+    <option name="languageLevel" value="ES6" />
+  </component>
+  <component name="ProjectResources">
+    <resource url="http://gtihub.com/orfby/simsandbox/api/xsd/builtin.xsd" location="$USER_HOME$/Programming/simsandbox/api/xsd/builtin.xsd" />
+  </component>
+</project>

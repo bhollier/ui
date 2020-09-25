@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xs:schema
+        xmlns:xs="http://www.w3.org/2001/XMLSchema"
+        xmlns="http://github.com/orfby/ui/api/schema"
+        targetNamespace="http://github.com/orfby/ui/api/schema">
+    <xs:simpleType name="relative-size">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="(match_parent)|(match_content)|(\d+(px)|(%))"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="absolute-size">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="\d+(px)"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="orientation">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="horizontal"/>
+            <xs:enumeration value="vertical"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="strbool">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="true"/>
+            <xs:enumeration value="t"/>
+            <xs:enumeration value="false"/>
+            <xs:enumeration value="f"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:attributeGroup name="bkg">
+        <xs:attribute name="background">
+            <xs:simpleType>
+                <xs:restriction base="xs:string"/>
+            </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="bkg-repeat">
+            <xs:simpleType>
+                <xs:restriction base="strbool"/>
+            </xs:simpleType>
+        </xs:attribute>
+    </xs:attributeGroup>
+
+    <xs:attributeGroup name="element">
+        <xs:attribute name="width" use="required">
+            <xs:simpleType>
+                <xs:restriction base="relative-size"/>
+            </xs:simpleType>
+        </xs:attribute>
+
+        <xs:attribute name="height" use="required">
+            <xs:simpleType>
+                <xs:restriction base="relative-size"/>
+            </xs:simpleType>
+        </xs:attribute>
+
+        <xs:attribute name="padding">
+            <xs:simpleType>
+                <xs:restriction base="absolute-size"/>
+            </xs:simpleType>
+        </xs:attribute>
+
+        <xs:attributeGroup ref="bkg"/>
+
+        <xs:attribute name="gravity">
+            <xs:simpleType>
+                <xs:restriction base="xs:string">
+                    <xs:enumeration value="center"/>
+                    <xs:enumeration value="top"/>
+                    <xs:enumeration value="bottom"/>
+                    <xs:enumeration value="left"/>
+                    <xs:enumeration value="right"/>
+                    <xs:enumeration value="top-left"/>
+                    <xs:enumeration value="top-right"/>
+                    <xs:enumeration value="bottom-left"/>
+                    <xs:enumeration value="bottom-right"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+    </xs:attributeGroup>
+
+    <xs:attributeGroup name="text">
+        <xs:attribute name="text">
+            <xs:simpleType>
+                <xs:restriction base="xs:string"/>
+            </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="text-size">
+            <xs:simpleType>
+                <xs:restriction base="xs:string">
+                    <xs:pattern value="[+-]?([0-9]*[.])?[0-9]+"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+    </xs:attributeGroup>
+</xs:schema>
