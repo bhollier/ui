@@ -13,9 +13,9 @@ import (
 //grid (either vertically or horizontally)
 type GridLayout struct {
 	//A grid layout is an element
-	element.Element
+	element.Impl
 	//It is also a layout
-	element.Layout
+	element.LayoutImpl
 
 	//The element's orientation
 	Orientation util.Orientation `uixml:"http://github.com/orfby/ui/api/schema orientation,optional"`
@@ -28,50 +28,58 @@ type GridLayout struct {
 	CellHeight util.RelativeSize `uixml:"http://github.com/orfby/ui/api/schema cell-height,optional"`
 
 	//The children in a grid format
-	grid [][]element.IsElement
+	grid [][]element.Element
 }
 
 //Function to create a new grid layout
-func NewGridLayout(name xml.Name, parent element.IsLayout) element.IsElement {
+func NewGridLayout(name xml.Name, parent element.Layout) element.Element {
 	return &GridLayout{
-		Element: element.NewElement(name, parent),
+		Impl:        element.NewElement(name, parent),
 		Orientation: util.DefaultOrientation,
-		Columns: 0,
-		CellWidth: util.ZeroRelativeSize,
-		CellHeight: util.ZeroRelativeSize,
+		Columns:     0,
+		CellWidth:   util.ZeroRelativeSize,
+		CellHeight:  util.ZeroRelativeSize,
 	}
 }
 
 //The XML name of the element
-var GridLayoutTypeName = xml.Name{Space: "http://github.com/orfby/ui/api/schema", Local:"GridLayout"}
+var GridLayoutTypeName = xml.Name{Space: "http://github.com/orfby/ui/api/schema", Local: "GridLayout"}
 
 //Function to unmarshal an XML element into
 //an element. This function is usually only
 //called by xml.Unmarshal
-func (e *GridLayout) UnmarshalXML(d* xml.Decoder, start xml.StartElement) (err error) {
+func (e *GridLayout) UnmarshalXML(d *xml.Decoder, start xml.StartElement) (err error) {
 	//Unmarshal the element part of the layout
-	err = e.Element.UnmarshalXML(d, start)
-	if err != nil {return err}
+	err = e.Impl.UnmarshalXML(d, start)
+	if err != nil {
+		return err
+	}
 
 	//Set the element's attributes
 	err = element.SetAttrs(e, start.Attr)
-	if err != nil {return err}
+	if err != nil {
+		return err
+	}
 
 	//Unmarshal the layout's children
-	e.Layout.Children, err = element.ChildrenUnmarshalXML(e, d, start)
-	if err != nil {return err}
+	e.LayoutImpl.Children, err = element.ChildrenUnmarshalXML(e, d, start)
+	if err != nil {
+		return err
+	}
 
 	//If there are children
-	if len(e.Layout.Children) > 0 {
+	if len(e.LayoutImpl.Children) > 0 {
 		if e.Columns == 0 {
 			if e.Orientation == util.HorizontalOrientation {
 				e.Columns = uint(len(e.Children))
-			} else {e.Columns = 1}
+			} else {
+				e.Columns = 1
+			}
 		}
 
 		//Create the grid
-		e.grid = make([][]element.IsElement, 1)
-		e.grid[0] = make([]element.IsElement, 0)
+		e.grid = make([][]element.Element, 1)
+		e.grid[0] = make([]element.Element, 0)
 
 		//Iterate over the children
 		row := 0
@@ -93,7 +101,7 @@ func (e *GridLayout) UnmarshalXML(d* xml.Decoder, start xml.StartElement) (err e
 				//If there will actually be a new column
 				if addedChildren < e.NumChildren() {
 					//Append a new array
-					e.grid = append(e.grid, make([]element.IsElement, 0))
+					e.grid = append(e.grid, make([]element.Element, 0))
 				}
 			}
 		}
@@ -120,22 +128,24 @@ func (e *GridLayout) UnmarshalXML(d* xml.Decoder, start xml.StartElement) (err e
 
 //Function to reset the element
 func (e *GridLayout) Reset() {
-	e.Element.Reset()
-	e.Layout.Reset()
+	e.Impl.Reset()
+	e.LayoutImpl.Reset()
 }
 
 //Function to determine whether
 //the element is initialised
 func (e *GridLayout) IsInitialised() bool {
-	return e.Element.IsInitialised() &&
+	return e.Impl.IsInitialised() &&
 		element.ChildrenAreInitialised(e)
 }
 
 //Function to initialise the element
 func (e *GridLayout) Init(window *pixelgl.Window, bounds *pixel.Rect) error {
 	//Initialise the element part of the layout
-	err := e.Element.Init(window, bounds)
-	if err != nil {return err}
+	err := e.Impl.Init(window, bounds)
+	if err != nil {
+		return err
+	}
 
 	//The actual width of a cell
 	actualCellWidth := new(float64)
@@ -234,17 +244,21 @@ func (e *GridLayout) Init(window *pixelgl.Window, bounds *pixel.Rect) error {
 
 					//Set the child's position
 					childBounds.Min.X = e.GetMin().X + padding + (float64(x) * *actualCellWidth)
-					childBounds.Min.Y = e.GetMax().Y - padding - (float64(y + 1) * *actualCellHeight)
+					childBounds.Min.Y = e.GetMax().Y - padding - (float64(y+1) * *actualCellHeight)
 					//Set the child's max position
 					//(as the position + the cell size)
 					childBounds.Max = childBounds.Min.Add(pixel.V(*actualCellWidth, *actualCellHeight))
 
 					//Otherwise set child bounds to nil
-				} else {childBounds = nil}
+				} else {
+					childBounds = nil
+				}
 
 				//Initialise the child
 				err := child.Init(window, childBounds)
-				if err != nil {return err}
+				if err != nil {
+					return err
+				}
 			}
 		}
 	}
@@ -255,14 +269,14 @@ func (e *GridLayout) Init(window *pixelgl.Window, bounds *pixel.Rect) error {
 //Function that is called when there
 //is a new event
 func (e *GridLayout) NewEvent(window *pixelgl.Window) {
-	e.Element.NewEvent(window)
-	e.Layout.NewEvent(window)
+	e.Impl.NewEvent(window)
+	e.LayoutImpl.NewEvent(window)
 }
 
 //Function to draw the element
 func (e *GridLayout) Draw() {
 	//Draw the element
-	e.Element.Draw()
+	e.Impl.Draw()
 	//Draw the layout
 	element.DrawLayout(e)
 }

@@ -46,7 +46,9 @@ func NewDesign(path string, windowConfig pixelgl.WindowConfig) (d *Design, err e
 	//Create the root
 	log.Printf("Loading XML design from '" + path + "'...")
 	d.root, err = element.NewRoot(nil, path)
-	if err != nil {return nil, err}
+	if err != nil {
+		return nil, err
+	}
 
 	//Create the window
 	log.Print("Creating pixelgl.Window...")
@@ -88,18 +90,18 @@ func (d *Design) update(root *element.Root) error {
 	//loop limit was reached) return an error
 	if !root.IsInitialised() {
 		//Make an array of uninitialised elements
-		uninitialisedElements := make([]element.IsElement, 0)
+		uninitialisedElements := make([]element.Element, 0)
 
 		//Recursive function to find uninitialised elements
-		var getUninitialisedElements func(element.IsElement)
-		getUninitialisedElements = func(e element.IsElement) {
+		var getUninitialisedElements func(element.Element)
+		getUninitialisedElements = func(e element.Element) {
 			//If the element isn't initialised
 			if !e.IsInitialised() {
 				//Add it to the array
 				uninitialisedElements = append(uninitialisedElements, e)
 
 				//Try to convert to a layout
-				layout, ok := e.(element.IsLayout)
+				layout, ok := e.(element.Layout)
 				//If it is a layout, iterate over the children
 				if ok {
 					for i := 0; i < layout.NumChildren(); i++ {
@@ -111,7 +113,7 @@ func (d *Design) update(root *element.Root) error {
 		}
 
 		//Call the function on root
-		getUninitialisedElements(root.IsElement)
+		getUninitialisedElements(root.Element)
 		//Create a string
 		uninitialisedElementsStr := ""
 		for i, elem := range uninitialisedElements {
@@ -119,7 +121,7 @@ func (d *Design) update(root *element.Root) error {
 			uninitialisedElementsStr +=
 				element.FullName(elem, ".", true)
 			//Add a comma unless this is the last element
-			if i < len(uninitialisedElements) - 1 {
+			if i < len(uninitialisedElements)-1 {
 				uninitialisedElementsStr += ", "
 			}
 		}
@@ -132,7 +134,7 @@ func (d *Design) update(root *element.Root) error {
 	//Draw the design
 	root.Draw()
 	//Draw the root onto the window
-	element.DrawCanvasOntoParent(root.IsElement.GetCanvas(), d.window.Canvas())
+	element.DrawCanvasOntoParent(root.Element.GetCanvas(), d.window.Canvas())
 	//Swap the window's buffers
 	d.window.SwapBuffers()
 
@@ -162,7 +164,7 @@ func (d *Design) pollEvents() {
 			err = d.update(newRoot)
 
 			//Set the new root
-			d.root.IsElement = newRoot.IsElement
+			d.root.Element = newRoot.Element
 
 			//If the window bounds changed
 		} else if d.prevWindowBounds != d.window.Bounds() {
@@ -177,7 +179,8 @@ func (d *Design) pollEvents() {
 
 		//Tell the root element
 		//there was a new event
-		/*go */d.root.NewEvent(d.window)
+		/*go */
+		d.root.NewEvent(d.window)
 
 		//Wait a bit before the next event
 		//time.Sleep(time.Second / 50)

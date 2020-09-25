@@ -5,7 +5,7 @@ import (
 )
 
 //Type for a callback
-type Callback func(IsElement) error
+type Callback func(Element) error
 
 //Type for a callback map
 type callbackMap map[string]Callback
@@ -27,7 +27,7 @@ func RegisterCallback(name string, c Callback) {
 }
 
 //Function to call a callback
-func Call(name string, e IsElement) error {
+func Call(name string, e Element) error {
 	//Try to get the callback
 	callback, ok := callbacks[name]
 	//If it was found, call it

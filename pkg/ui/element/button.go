@@ -12,16 +12,18 @@ type ButtonState string
 
 //The default button state
 const ButtonDefaultState = "default"
+
 //The button state when the mouse is over it
 const ButtonHoveredState = "hovered"
+
 //The button state for when the
 //mouse is pressing the button
 const ButtonPressedState = "pressed"
 
 //Interface for a button element
-type IsButton interface {
+type HasButton interface {
 	//A button is an element
-	IsElement
+	Element
 
 	//Function to get the button's
 	//current state
@@ -48,10 +50,12 @@ type IsButton interface {
 	CallPressCallback() error
 }
 
-//Type for a button
-type Button struct {
+//Type for a button. Note, structs
+//must either include ButtonImpl or
+//Impl, not both
+type ButtonImpl struct {
 	//The button is an element
-	Element
+	Impl
 
 	//The button's current state
 	state ButtonState
@@ -72,8 +76,8 @@ type Button struct {
 }
 
 //Function to create a button element
-func NewButton(name xml.Name, parent IsLayout) Button {
-	e := Button{Element: NewElement(name, parent)}
+func NewButton(name xml.Name, parent Layout) ButtonImpl {
+	e := ButtonImpl{Impl: NewElement(name, parent)}
 	//Set the state as the default
 	e.state = ButtonDefaultState
 	//Create the backgrounds map
@@ -87,10 +91,11 @@ func NewButton(name xml.Name, parent IsLayout) Button {
 
 //Function to get the button's
 //current state
-func (e *Button) GetState() ButtonState {return e.state}
+func (e *ButtonImpl) GetState() ButtonState { return e.state }
+
 //Function to set the button's
 //current state
-func (e *Button) SetState(s ButtonState) {
+func (e *ButtonImpl) SetState(s ButtonState) {
 	e.state = s
 	//Update the background
 	e.SetBkgSprite(e.backgrounds[e.state])
@@ -99,23 +104,30 @@ func (e *Button) SetState(s ButtonState) {
 //Function to get the button's
 //background field from XML for
 //the given state
-func (e *Button) GetButtonBkgField(s ButtonState) string {
-	if s == ButtonDefaultState {return e.GetBkgField()
-	} else if s == ButtonHoveredState {return e.HoveredBackground
-	} else {return e.PressedBackground}
+func (e *ButtonImpl) GetButtonBkgField(s ButtonState) string {
+	if s == ButtonDefaultState {
+		return e.GetBkgField()
+	} else if s == ButtonHoveredState {
+		return e.HoveredBackground
+	} else {
+		return e.PressedBackground
+	}
 }
 
 //Function to get the button's
 //background sprite for the given
 //state
-func (e *Button) GetButtonBkg(s ButtonState) *pixel.Sprite {return e.backgrounds[s]}
+func (e *ButtonImpl) GetButtonBkg(s ButtonState) *pixel.Sprite { return e.backgrounds[s] }
+
 //Function to set the button's
 //background sprite for the given
 //state
-func (e *Button) SetButtonBkg(state ButtonState, sprite *pixel.Sprite) {e.backgrounds[state] = sprite}
+func (e *ButtonImpl) SetButtonBkg(state ButtonState, sprite *pixel.Sprite) {
+	e.backgrounds[state] = sprite
+}
 
 //Function to call the press callback
-func (e *Button) CallPressCallback() error {
+func (e *ButtonImpl) CallPressCallback() error {
 	if e.PressCallback != "" {
 		return Call(e.PressCallback, e)
 	}
@@ -124,29 +136,33 @@ func (e *Button) CallPressCallback() error {
 
 //Function to determine whether
 //the element is initialised
-func (e *Button) IsInitialised() bool {
-	return e.Element.IsInitialised() &&
+func (e *ButtonImpl) IsInitialised() bool {
+	return e.Impl.IsInitialised() &&
 		(e.HoveredBackground == "" || e.backgrounds[ButtonHoveredState] != nil) &&
 		(e.PressedBackground == "" || e.backgrounds[ButtonPressedState] != nil)
 }
 
 //Function to initialise the element
-func (e *Button) Init(window *pixelgl.Window, bounds *pixel.Rect) error {
+func (e *ButtonImpl) Init(window *pixelgl.Window, bounds *pixel.Rect) error {
 	//Initialise the element
-	err := e.Element.Init(window, bounds)
-	if err != nil {return err}
+	err := e.Impl.Init(window, bounds)
+	if err != nil {
+		return err
+	}
 
 	//If the bounds are known
 	if bounds != nil {
 		//If the default background hasn't been set
 		if e.backgrounds[ButtonDefaultState] == nil {
-			e.backgrounds[ButtonDefaultState] = e.Element.GetBkgSprite()
+			e.backgrounds[ButtonDefaultState] = e.Impl.GetBkgSprite()
 		}
 		//If the hovered background hasn't been made
 		if e.backgrounds[ButtonHoveredState] == nil {
 			//Create the background
 			sprite, err := CreateSpriteFromField(e.HoveredBackground)
-			if err != nil {return err}
+			if err != nil {
+				return err
+			}
 			if sprite != nil {
 				e.backgrounds[ButtonHoveredState] = sprite
 			} else {
@@ -157,7 +173,9 @@ func (e *Button) Init(window *pixelgl.Window, bounds *pixel.Rect) error {
 		if e.backgrounds[ButtonPressedState] == nil {
 			//Create the background
 			sprite, err := CreateSpriteFromField(e.PressedBackground)
-			if err != nil {return err}
+			if err != nil {
+				return err
+			}
 			if sprite != nil {
 				e.backgrounds[ButtonPressedState] = sprite
 			} else {
@@ -169,7 +187,7 @@ func (e *Button) Init(window *pixelgl.Window, bounds *pixel.Rect) error {
 }
 
 //Function to handle a button's new event
-func ButtonNewEvent(e IsButton, window *pixelgl.Window) {
+func ButtonNewEvent(e HasButton, window *pixelgl.Window) {
 	//Whether the button's state changed
 	stateChange := false
 	//If the mouse is actually in the window

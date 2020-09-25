@@ -6,7 +6,7 @@ import (
 )
 
 //Type for an element factory
-type Factory func(name xml.Name, parent IsLayout) IsElement
+type Factory func(name xml.Name, parent Layout) Element
 
 //Type for storing information
 //about an element type
@@ -37,7 +37,9 @@ func init() {
 func XMLNameToString(name xml.Name) string {
 	if name.Space == "" {
 		return name.Local
-	} else {return name.Space + ":" + name.Local}
+	} else {
+		return name.Space + ":" + name.Local
+	}
 }
 
 //Function to determine if
@@ -55,18 +57,22 @@ func Register(name xml.Name, reflectType reflect.Type, factory Factory) {
 	//Add the factory to the map
 	elementTypes[name] = elementType{
 		ReflectType: reflectType,
-		Factory: factory,
+		Factory:     factory,
 	}
 }
 
 //Function to get an element's name.
 //The function returns an empty string
 //if the element isn't registered
-func Name(e IsElement, includeNamespace bool) (name string) {
+func Name(e Element, includeNamespace bool) (name string) {
 	if includeNamespace {
 		name = XMLNameToString(e.GetName())
-	} else {name = e.GetName().Local}
-	if e.GetID() != nil {name += "(id=" + *e.GetID() + ")"}
+	} else {
+		name = e.GetName().Local
+	}
+	if e.GetID() != nil {
+		name += "(id=" + *e.GetID() + ")"
+	}
 	return
 }
 
@@ -75,7 +81,7 @@ func Name(e IsElement, includeNamespace bool) (name string) {
 //grandparent's etc. element names.
 //The function calls any unknown elements
 //"unknown" in the path
-func FullName(e IsElement, sep string, includeNamespace bool) (name string) {
+func FullName(e Element, sep string, includeNamespace bool) (name string) {
 	name = Name(e, includeNamespace)
 	e = e.GetParent()
 	//While the current element isn't nil
@@ -96,7 +102,7 @@ func FullName(e IsElement, sep string, includeNamespace bool) (name string) {
 //name.Space in parent.GetNamespaces(),
 //then if still not found will search for
 //an element type with a matching name.Local
-func New(name xml.Name, parent IsLayout) IsElement {
+func New(name xml.Name, parent Layout) Element {
 	//Try to get the element type
 	elemType, ok := elementTypes[name]
 	//If it was found, call the type's factory
@@ -109,7 +115,9 @@ func New(name xml.Name, parent IsLayout) IsElement {
 			for _, ns := range parent.GetNamespaces() {
 				elemType, ok = elementTypes[xml.Name{
 					Local: name.Local, Space: ns}]
-				if ok {return elemType.Factory(name, parent)}
+				if ok {
+					return elemType.Factory(name, parent)
+				}
 			}
 		}
 

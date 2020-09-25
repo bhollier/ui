@@ -8,8 +8,8 @@ import (
 	"image/color"
 )
 
-//Interface for an element with a background
-type HasBkg interface {
+//Interface for a background
+type Bkg interface {
 	//Function to get the element's
 	//background XML field
 	GetBkgField() string
@@ -27,7 +27,7 @@ type HasBkg interface {
 }
 
 //Type for an element's background
-type Bkg struct {
+type BkgImpl struct {
 	//The element's background
 	//from xml
 	BackgroundField string `uixml:"http://github.com/orfby/ui/api/schema background,optional"`
@@ -41,18 +41,21 @@ type Bkg struct {
 
 //Function to get the background's
 //XML field
-func (e *Bkg) GetBkgField() string {return e.BackgroundField}
+func (e *BkgImpl) GetBkgField() string { return e.BackgroundField }
+
 //Function to get the background's
 //sprite
-func (e *Bkg) GetBkgSprite() *pixel.Sprite {return e.sprite}
+func (e *BkgImpl) GetBkgSprite() *pixel.Sprite { return e.sprite }
+
 //Function to set the background's
 //sprite
-func (e *Bkg) SetBkgSprite(s *pixel.Sprite) {e.sprite = s}
+func (e *BkgImpl) SetBkgSprite(s *pixel.Sprite) { e.sprite = s }
+
 //Function to determine whether
 //the background should repeat.
 //Should only return true if
 //the background isn't a colour
-func (e *Bkg) ShouldRepeat() bool {
+func (e *BkgImpl) ShouldRepeat() bool {
 	return e.GetBkgField() != "" && e.GetBkgField()[0] != '#' && e.Repeat
 }
 
@@ -62,7 +65,7 @@ func (e *Bkg) ShouldRepeat() bool {
 //set (assuming it's meant to be set).
 //This function doesn't call
 //element.IsInitialised
-func (e *Bkg) IsInitialised() bool {
+func (e *BkgImpl) IsInitialised() bool {
 	//If the element doesn't have a background
 	return e.GetBkgField() == "" ||
 		//Or the background has been initialised
@@ -91,11 +94,13 @@ func CreateSpriteFromField(field string) (*pixel.Sprite, error) {
 			//Convert it to a pixel picture
 			pic := pixel.PictureDataFromImage(img)
 			//Create a sprite from the picture
-			return pixel.NewSprite(pic, pic.Bounds()),  nil
+			return pixel.NewSprite(pic, pic.Bounds()), nil
 		} else {
 			//Load the picture
 			pic, err := util.LoadPicture(field)
-			if err != nil {return nil, err}
+			if err != nil {
+				return nil, err
+			}
 			//Create a sprite from the picture
 			return pixel.NewSprite(pic, pic.Bounds()), nil
 		}
@@ -108,14 +113,16 @@ func CreateSpriteFromField(field string) (*pixel.Sprite, error) {
 //Should be called last (as the size of
 //the background depends on the actual
 //size of the element)
-func InitBkg(e HasBkg, bounds *pixel.Rect) error {
+func InitBkg(e Bkg, bounds *pixel.Rect) error {
 	//If the bounds are known
 	if bounds != nil {
 		//If the sprite doesn't exist
 		if e.GetBkgSprite() == nil {
 			//Create the background
 			sprite, err := CreateSpriteFromField(e.GetBkgField())
-			if err != nil {return err}
+			if err != nil {
+				return err
+			}
 			e.SetBkgSprite(sprite)
 		}
 	}
@@ -126,7 +133,7 @@ func InitBkg(e HasBkg, bounds *pixel.Rect) error {
 //Function to draw the background
 //of an element. This function
 //should be called first
-func DrawBkg(e IsElement) {
+func DrawBkg(e Element) {
 	//Draw the background sprite, if it exists
 	if e.GetBkgSprite() != nil {
 		//If the background should repeat

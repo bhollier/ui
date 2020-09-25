@@ -7,10 +7,10 @@ import (
 )
 
 //Wrapper type that stores an
-//element.IsElement and its relative fields
+//element.Element and its relative fields
 type relativeElement struct {
 	//The parent element
-	parent element.IsLayout
+	parent element.Layout
 
 	//The attribute for specifying which
 	//element this element goes on top of
@@ -30,17 +30,17 @@ type relativeElement struct {
 
 	//The element itself (the "hidden" tag
 	//means element.SetAttrs won't touch it)
-	element.IsElement `uixml:"hidden"`
+	element.Element `uixml:"hidden"`
 }
 
 //Function to unmarshal an XML element into
 //a relative element. This function is
 //only called by xml.Unmarshal
-func (e *relativeElement) UnmarshalXML(d* xml.Decoder, start xml.StartElement) (err error) {
+func (e *relativeElement) UnmarshalXML(d *xml.Decoder, start xml.StartElement) (err error) {
 	//Create an element of the type
-	e.IsElement = element.New(start.Name, e.parent)
+	e.Element = element.New(start.Name, e.parent)
 	//If the element wasn't created
-	if e.IsElement == nil {
+	if e.Element == nil {
 		return errors.New("unknown element type '" +
 			element.XMLNameToString(start.Name) + "'")
 	}
@@ -57,7 +57,7 @@ func (e *relativeElement) UnmarshalXML(d* xml.Decoder, start xml.StartElement) (
 	//Iterate over the attributes
 	for _, attr := range start.Attr {
 		//If the attribute isn't a relative attribute
-		if  element.XMLNameMatch(attr.Name, topOfName) ||
+		if element.XMLNameMatch(attr.Name, topOfName) ||
 			element.XMLNameMatch(attr.Name, bottomOfName) ||
 			element.XMLNameMatch(attr.Name, leftOfName) ||
 			element.XMLNameMatch(attr.Name, rightOfName) {
@@ -68,7 +68,9 @@ func (e *relativeElement) UnmarshalXML(d* xml.Decoder, start xml.StartElement) (
 
 	//Set the relative attributes
 	err = element.SetAttrs(e, relativetAttrs)
-	if err != nil {return err}
+	if err != nil {
+		return err
+	}
 
 	//If both top and bottom are set
 	if e.TopOf != zeroRelativePosition && e.BottomOf != zeroRelativePosition {
@@ -95,7 +97,7 @@ func (e *relativeElement) UnmarshalXML(d* xml.Decoder, start xml.StartElement) (
 	//Iterate over the attributes
 	for _, attr := range start.Attr {
 		//If the attribute isn't a relative attribute
-		if  !element.XMLNameMatch(attr.Name, topOfName) &&
+		if !element.XMLNameMatch(attr.Name, topOfName) &&
 			!element.XMLNameMatch(attr.Name, bottomOfName) &&
 			!element.XMLNameMatch(attr.Name, leftOfName) &&
 			!element.XMLNameMatch(attr.Name, rightOfName) {
@@ -108,5 +110,5 @@ func (e *relativeElement) UnmarshalXML(d* xml.Decoder, start xml.StartElement) (
 	start.Attr = elementAttrs
 
 	//Unmarshal the element itself
-	return e.IsElement.UnmarshalXML(d, start)
+	return e.Element.UnmarshalXML(d, start)
 }

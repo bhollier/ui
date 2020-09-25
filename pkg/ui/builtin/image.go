@@ -12,30 +12,34 @@ import (
 type Image struct {
 	//An image element is an
 	//element
-	element.Element
+	element.Impl
 
 	//It also has an image
-	element.Image
+	element.ImageImpl
 }
 
 //Function to create a new image
-func NewImage(name xml.Name, parent element.IsLayout) element.IsElement {
-	return &Image{Element: element.NewElement(name, parent)}
+func NewImage(name xml.Name, parent element.Layout) element.Element {
+	return &Image{Impl: element.NewElement(name, parent)}
 }
 
 //The XML name of the element
-var ImageTypeName = xml.Name{Space:"http://github.com/orfby/ui/api/schema", Local:"Image"}
+var ImageTypeName = xml.Name{Space: "http://github.com/orfby/ui/api/schema", Local: "Image"}
 
 //Function to unmarshal an XML element into
 //an element. This function is usually only
 //called by xml.Unmarshal
-func (e *Image) UnmarshalXML(d* xml.Decoder, start xml.StartElement) (err error) {
+func (e *Image) UnmarshalXML(d *xml.Decoder, start xml.StartElement) (err error) {
 	//Unmarshal the element
-	err = e.Element.UnmarshalXML(d, start)
-	if err != nil {return err}
+	err = e.Impl.UnmarshalXML(d, start)
+	if err != nil {
+		return err
+	}
 	//Set the element's attributes
 	err = element.SetAttrs(e, start.Attr)
-	if err != nil {return err}
+	if err != nil {
+		return err
+	}
 	return d.Skip()
 }
 
@@ -43,9 +47,9 @@ func (e *Image) UnmarshalXML(d* xml.Decoder, start xml.StartElement) (err error)
 //the element is initialised
 func (e *Image) IsInitialised() bool {
 	//If the element is initialised
-	return e.Element.IsInitialised() &&
+	return e.Impl.IsInitialised() &&
 		//And the image has been initialised
-		e.Image.IsInitialised()
+		e.ImageImpl.IsInitialised()
 }
 
 //Function to initialise the element
@@ -53,12 +57,16 @@ func (e *Image) IsInitialised() bool {
 //sprite locations, etc.)
 func (e *Image) Init(window *pixelgl.Window, bounds *pixel.Rect) error {
 	//Initialise the element
-	err := e.Element.Init(window, bounds)
-	if err != nil {return err}
+	err := e.Impl.Init(window, bounds)
+	if err != nil {
+		return err
+	}
 
 	//Initialise the image
 	err = element.InitImage(e)
-	if err != nil {return err}
+	if err != nil {
+		return err
+	}
 
 	//If no image was given
 	if e.GetImageField() == "" {
@@ -80,7 +88,7 @@ func (e *Image) Init(window *pixelgl.Window, bounds *pixel.Rect) error {
 //Function to draw the element
 func (e *Image) Draw() {
 	//Draw the element
-	e.Element.Draw()
+	e.Impl.Draw()
 	//Draw the image
 	element.DrawImage(e)
 }

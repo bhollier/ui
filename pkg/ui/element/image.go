@@ -8,7 +8,7 @@ import (
 type HasImage interface {
 	//An element with an image is an
 	//element
-	IsElement
+	Element
 
 	//Function to get the element's
 	//image XML field
@@ -22,7 +22,7 @@ type HasImage interface {
 }
 
 //Type for an element's image
-type Image struct {
+type ImageImpl struct {
 	//The element's image
 	//from xml
 	ImageField string `uixml:"http://github.com/orfby/ui/api/schema source,optional"`
@@ -33,20 +33,22 @@ type Image struct {
 
 //Function to get the background's
 //XML field
-func (e *Image) GetImageField() string {return e.ImageField}
+func (e *ImageImpl) GetImageField() string { return e.ImageField }
+
 //Function to get the background's
 //sprite
-func (e *Image) GetImageSprite() *pixel.Sprite {return e.sprite}
+func (e *ImageImpl) GetImageSprite() *pixel.Sprite { return e.sprite }
+
 //Function to set the background's
 //sprite
-func (e *Image) SetImageSprite(s *pixel.Sprite) {e.sprite = s}
+func (e *ImageImpl) SetImageSprite(s *pixel.Sprite) { e.sprite = s }
 
 //Function to determine whether the
 //image has been initialised, by whether
 //its image sprite has been set (assuming
 //it's meant to be set). This function
 //doesn't call element.IsInitialised
-func (e *Image) IsInitialised() bool {
+func (e *ImageImpl) IsInitialised() bool {
 	//If the element doesn't have an image
 	return e.GetImageField() == "" ||
 		//Or the image has been initialised
@@ -60,7 +62,9 @@ func InitImage(e HasImage) error {
 	if e.GetImageSprite() == nil {
 		//Create the image
 		sprite, err := CreateSpriteFromField(e.GetImageField())
-		if err != nil {return err}
+		if err != nil {
+			return err
+		}
 		e.SetImageSprite(sprite)
 	}
 

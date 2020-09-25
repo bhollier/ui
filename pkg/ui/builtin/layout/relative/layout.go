@@ -14,7 +14,7 @@ import (
 type Layout struct {
 	//A relative layout is an
 	//element
-	element.Element
+	element.Impl
 
 	//The layout's child elements
 	//(in order)
@@ -22,25 +22,29 @@ type Layout struct {
 }
 
 //Function to create a new relative layout
-func NewLayout(name xml.Name, parent element.IsLayout) element.IsElement {
-	return &Layout{Element: element.NewElement(name, parent)}
+func NewLayout(name xml.Name, parent element.Layout) element.Element {
+	return &Layout{Impl: element.NewElement(name, parent)}
 }
 
 //The XML name of the element
-var LayoutTypeName = xml.Name{Space: "http://github.com/orfby/ui/api/schema", Local:"RelativeLayout"}
+var LayoutTypeName = xml.Name{Space: "http://github.com/orfby/ui/api/schema", Local: "RelativeLayout"}
 
 //Function to get one of a layout's
 //child elements
-func (e *Layout) GetChild(n int) element.IsElement {return &e.children[n]}
+func (e *Layout) GetChild(n int) element.Element { return &e.children[n] }
+
 //Function to get the number element
 //elements a layout has
-func (e *Layout) NumChildren() int {return len(e.children)}
+func (e *Layout) NumChildren() int { return len(e.children) }
+
 //Function to get one of a layout's child
 //elements by its ID. Returns nil if no
 //child could be found
-func (e *Layout) GetChildByID(id string) element.IsElement {
+func (e *Layout) GetChildByID(id string) element.Element {
 	for _, child := range e.children {
-		if child.GetID() != nil && *child.GetID() == id {return &child}
+		if child.GetID() != nil && *child.GetID() == id {
+			return &child
+		}
 	}
 	return nil
 }
@@ -48,14 +52,18 @@ func (e *Layout) GetChildByID(id string) element.IsElement {
 //Function to unmarshal an XML element into
 //an element. This function is usually only
 //called by xml.Unmarshal
-func (e *Layout) UnmarshalXML(d* xml.Decoder, start xml.StartElement) (err error) {
+func (e *Layout) UnmarshalXML(d *xml.Decoder, start xml.StartElement) (err error) {
 	//Unmarshal the element part of the layout
-	err = e.Element.UnmarshalXML(d, start)
-	if err != nil {return err}
+	err = e.Impl.UnmarshalXML(d, start)
+	if err != nil {
+		return err
+	}
 
 	//Set the element's attributes
 	err = element.SetAttrs(e, start.Attr)
-	if err != nil {return err}
+	if err != nil {
+		return err
+	}
 
 	//If the layout is meant to match
 	//the content, throw an error
@@ -71,7 +79,8 @@ func (e *Layout) UnmarshalXML(d* xml.Decoder, start xml.StartElement) (err error
 	//Create the array of children
 	e.children = make([]relativeElement, 0)
 	//Loop over the child xml elements
-	Loop: for {
+Loop:
+	for {
 		//Get the next token
 		t, err := d.Token()
 		if err != nil {
@@ -92,7 +101,9 @@ func (e *Layout) UnmarshalXML(d* xml.Decoder, start xml.StartElement) (err error
 
 			//If this is the end of the element
 		case xml.EndElement:
-			if tt == start.End() {break Loop}
+			if tt == start.End() {
+				break Loop
+			}
 		}
 	}
 
@@ -101,22 +112,22 @@ func (e *Layout) UnmarshalXML(d* xml.Decoder, start xml.StartElement) (err error
 		//If the top of element exists but the ID leads nowhere
 		if child.TopOf != zeroRelativePosition && child.TopOf.ElementID != "" &&
 			e.GetChildByID(child.TopOf.ElementID) == nil {
-			return element.NewNoElemError(child.IsElement, child.TopOf.ElementID, "top-of")
+			return element.NewNoElemError(child.Element, child.TopOf.ElementID, "top-of")
 		}
 		//If the bottom of element exists but the ID leads nowhere
 		if child.BottomOf != zeroRelativePosition && child.BottomOf.ElementID != "" &&
 			e.GetChildByID(child.BottomOf.ElementID) == nil {
-			return element.NewNoElemError(child.IsElement, child.BottomOf.ElementID, "bottom-of")
+			return element.NewNoElemError(child.Element, child.BottomOf.ElementID, "bottom-of")
 		}
 		//If the left of element exists but the ID leads nowhere
 		if child.LeftOf != zeroRelativePosition && child.LeftOf.ElementID != "" &&
 			e.GetChildByID(child.LeftOf.ElementID) == nil {
-			return element.NewNoElemError(child.IsElement, child.LeftOf.ElementID, "left-of")
+			return element.NewNoElemError(child.Element, child.LeftOf.ElementID, "left-of")
 		}
 		//If the right of element exists but the ID leads nowhere
 		if child.RightOf != zeroRelativePosition && child.RightOf.ElementID != "" &&
 			e.GetChildByID(child.RightOf.ElementID) == nil {
-			return element.NewNoElemError(child.IsElement, child.RightOf.ElementID, "right-of")
+			return element.NewNoElemError(child.Element, child.RightOf.ElementID, "right-of")
 		}
 
 		//todo  make sure there are no circular
@@ -128,7 +139,7 @@ func (e *Layout) UnmarshalXML(d* xml.Decoder, start xml.StartElement) (err error
 
 //Function to reset the element
 func (e *Layout) Reset() {
-	e.Element.Reset()
+	e.Impl.Reset()
 	for _, child := range e.children {
 		child.Reset()
 	}
@@ -137,15 +148,17 @@ func (e *Layout) Reset() {
 //Function to determine whether
 //the element is initialised
 func (e *Layout) IsInitialised() bool {
-	return e.Element.IsInitialised() &&
+	return e.Impl.IsInitialised() &&
 		element.ChildrenAreInitialised(e)
 }
 
 //Function to initialise the element
 func (e *Layout) Init(window *pixelgl.Window, bounds *pixel.Rect) error {
 	//Initialise the element part of the layout
-	err := e.Element.Init(window, bounds)
-	if err != nil {return err}
+	err := e.Impl.Init(window, bounds)
+	if err != nil {
+		return err
+	}
 
 	//Iterate over the elements
 	for _, child := range e.children {
@@ -154,7 +167,8 @@ func (e *Layout) Init(window *pixelgl.Window, bounds *pixel.Rect) error {
 		ySet := false
 		xSet := false
 
-		if bounds == nil {childBounds = nil
+		if bounds == nil {
+			childBounds = nil
 		} else {
 			//If the child's width and height are known
 			if child.GetActualWidth() != nil && child.GetActualHeight() != nil {
@@ -189,7 +203,7 @@ func (e *Layout) Init(window *pixelgl.Window, bounds *pixel.Rect) error {
 						relativeElem := e.GetChildByID(child.TopOf.ElementID)
 						//This shouldn't happen, but check it anyways
 						if relativeElem == nil {
-							return element.NewNoElemError(child.IsElement, child.TopOf.ElementID, "top-of")
+							return element.NewNoElemError(child.Element, child.TopOf.ElementID, "top-of")
 						}
 						if relativeElem.GetMin() != nil &&
 							relativeElem.GetMax() != nil {
@@ -239,7 +253,7 @@ func (e *Layout) Init(window *pixelgl.Window, bounds *pixel.Rect) error {
 						relativeElem := e.GetChildByID(child.BottomOf.ElementID)
 						//This shouldn't happen, but check it anyways
 						if relativeElem == nil {
-							return element.NewNoElemError(child.IsElement, child.BottomOf.ElementID, "bottom-of")
+							return element.NewNoElemError(child.Element, child.BottomOf.ElementID, "bottom-of")
 						}
 						if relativeElem.GetMin() != nil &&
 							relativeElem.GetMax() != nil {
@@ -292,7 +306,7 @@ func (e *Layout) Init(window *pixelgl.Window, bounds *pixel.Rect) error {
 							relativeElem := e.GetChildByID(child.LeftOf.ElementID)
 							//This shouldn't happen, but check it anyways
 							if relativeElem == nil {
-								return element.NewNoElemError(child.IsElement, child.LeftOf.ElementID, "left-of")
+								return element.NewNoElemError(child.Element, child.LeftOf.ElementID, "left-of")
 							}
 							if relativeElem.GetMin() != nil &&
 								relativeElem.GetMax() != nil {
@@ -346,7 +360,7 @@ func (e *Layout) Init(window *pixelgl.Window, bounds *pixel.Rect) error {
 							relativeElem := e.GetChildByID(child.RightOf.ElementID)
 							//This shouldn't happen, but check it anyways
 							if relativeElem == nil {
-								return element.NewNoElemError(child.IsElement, child.BottomOf.ElementID, "right-of")
+								return element.NewNoElemError(child.Element, child.BottomOf.ElementID, "right-of")
 							}
 							if relativeElem.GetMin() != nil &&
 								relativeElem.GetMax() != nil {
@@ -394,7 +408,9 @@ func (e *Layout) Init(window *pixelgl.Window, bounds *pixel.Rect) error {
 
 		//Initialise the child
 		err := child.Init(window, childBounds)
-		if err != nil {return err}
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -404,7 +420,7 @@ func (e *Layout) Init(window *pixelgl.Window, bounds *pixel.Rect) error {
 //is a new event. This function only
 //calls NewEvent on the child elements
 func (e *Layout) NewEvent(window *pixelgl.Window) {
-	e.Element.NewEvent(window)
+	e.Impl.NewEvent(window)
 	for _, child := range e.children {
 		child.NewEvent(window)
 	}
@@ -413,7 +429,7 @@ func (e *Layout) NewEvent(window *pixelgl.Window) {
 //Function to draw the element
 func (e *Layout) Draw() {
 	//Draw the element
-	e.Element.Draw()
+	e.Impl.Draw()
 	//Draw the layout
 	element.DrawLayout(e)
 }

@@ -10,54 +10,60 @@ import (
 //Type for an element that imports another design
 type Import struct {
 	//The import node is an element
-	element.Element
+	element.Impl
 	//It is also (technically) a layout
-	element.Layout
+	element.LayoutImpl
 
 	//The path to the design
 	Path string `uixml:"http://github.com/orfby/ui/api/schema path"`
 }
 
 //Function to create a new import element
-func NewImport(name xml.Name, parent element.IsLayout) element.IsElement {
-	return &Import{Element: element.NewElement(name, parent)}
+func NewImport(name xml.Name, parent element.Layout) element.Element {
+	return &Import{Impl: element.NewElement(name, parent)}
 }
 
 //The XML name of the import element
-var ImportTypeName = xml.Name{Space: "http://github.com/orfby/ui/api/schema", Local:"Import"}
+var ImportTypeName = xml.Name{Space: "http://github.com/orfby/ui/api/schema", Local: "Import"}
 
 //Function to unmarshal an XML element into
 //an element. This function is usually only
 //called by xml.Unmarshal
-func (e *Import) UnmarshalXML(d* xml.Decoder, start xml.StartElement) (err error) {
+func (e *Import) UnmarshalXML(d *xml.Decoder, start xml.StartElement) (err error) {
 	//Unmarshal the element part of the layout
-	err = e.Element.UnmarshalXML(d, start)
-	if err != nil {return err}
+	err = e.Impl.UnmarshalXML(d, start)
+	if err != nil {
+		return err
+	}
 
 	//Set the element's attributes
 	err = element.SetAttrs(e, start.Attr)
-	if err != nil {return err}
+	if err != nil {
+		return err
+	}
 
 	//Create the root
 	root, err := element.NewRoot(e, e.Path)
-	if err != nil {return err}
+	if err != nil {
+		return err
+	}
 
 	//Set it as the only child
-	e.Children = []element.IsElement{root.IsElement}
+	e.Children = []element.Element{root.Element}
 
 	return d.Skip()
 }
 
 //Function to reset the element
 func (e *Import) Reset() {
-	e.Element.Reset()
-	e.Layout.Reset()
+	e.Impl.Reset()
+	e.LayoutImpl.Reset()
 }
 
 //Function to determine whether
 //the element is initialised
 func (e *Import) IsInitialised() bool {
-	return e.Element.IsInitialised() &&
+	return e.Impl.IsInitialised() &&
 		element.ChildrenAreInitialised(e)
 }
 
@@ -69,12 +75,16 @@ func (e *Import) IsInitialised() bool {
 //"match_content"
 func (e *Import) Init(window *pixelgl.Window, bounds *pixel.Rect) (err error) {
 	//Initialise the element part of the import
-	err = e.Element.Init(window, bounds)
-	if err != nil {return err}
+	err = e.Impl.Init(window, bounds)
+	if err != nil {
+		return err
+	}
 
 	//Initialise the child
 	err = e.GetChild(0).Init(window, bounds)
-	if err != nil {return err}
+	if err != nil {
+		return err
+	}
 
 	//If the width is meant to match the content size
 	if e.GetRelWidth().MatchContent {
@@ -94,14 +104,14 @@ func (e *Import) Init(window *pixelgl.Window, bounds *pixel.Rect) (err error) {
 //Function that is called when there
 //is a new event
 func (e *Import) NewEvent(window *pixelgl.Window) {
-	e.Element.NewEvent(window)
-	e.Layout.NewEvent(window)
+	e.Impl.NewEvent(window)
+	e.LayoutImpl.NewEvent(window)
 }
 
 //Function to draw the element
 func (e *Import) Draw() {
 	//Draw the element
-	e.Element.Draw()
+	e.Impl.Draw()
 	//Draw the layout
 	element.DrawLayout(e)
 }

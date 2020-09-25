@@ -13,54 +13,60 @@ import (
 //list (either vertically or horizontally)
 type LinearLayout struct {
 	//A linear layout is an element
-	element.Element
+	element.Impl
 	//It is also a layout
-	element.Layout
+	element.LayoutImpl
 
 	//The element's orientation
 	Orientation util.Orientation `uixml:"http://github.com/orfby/ui/api/schema orientation,optional"`
 }
 
 //Function to create a new linear layout
-func NewLinearLayout(name xml.Name, parent element.IsLayout) element.IsElement {
+func NewLinearLayout(name xml.Name, parent element.Layout) element.Element {
 	return &LinearLayout{
-		Element: element.NewElement(name, parent),
+		Impl:        element.NewElement(name, parent),
 		Orientation: util.DefaultOrientation,
 	}
 }
 
 //The XML name of the element
-var LinearLayoutTypeName = xml.Name{Space: "http://github.com/orfby/ui/api/schema", Local:"LinearLayout"}
+var LinearLayoutTypeName = xml.Name{Space: "http://github.com/orfby/ui/api/schema", Local: "LinearLayout"}
 
 //Function to unmarshal an XML element into
 //an element. This function is usually only
 //called by xml.Unmarshal
-func (e *LinearLayout) UnmarshalXML(d* xml.Decoder, start xml.StartElement) (err error) {
+func (e *LinearLayout) UnmarshalXML(d *xml.Decoder, start xml.StartElement) (err error) {
 	//Unmarshal the element part of the layout
-	err = e.Element.UnmarshalXML(d, start)
-	if err != nil {return err}
+	err = e.Impl.UnmarshalXML(d, start)
+	if err != nil {
+		return err
+	}
 
 	//Set the element's attributes
 	err = element.SetAttrs(e, start.Attr)
-	if err != nil {return err}
+	if err != nil {
+		return err
+	}
 
 	//Unmarshal the layout's children
-	e.Layout.Children, err = element.ChildrenUnmarshalXML(e, d, start)
-	if err != nil {return err}
+	e.LayoutImpl.Children, err = element.ChildrenUnmarshalXML(e, d, start)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
 
 //Function to reset the element
 func (e *LinearLayout) Reset() {
-	e.Element.Reset()
-	e.Layout.Reset()
+	e.Impl.Reset()
+	e.LayoutImpl.Reset()
 }
 
 //Function to determine whether
 //the element is initialised
 func (e *LinearLayout) IsInitialised() bool {
-	return e.Element.IsInitialised() &&
+	return e.Impl.IsInitialised() &&
 		element.ChildrenAreInitialised(e)
 }
 
@@ -163,8 +169,10 @@ func (e *LinearLayout) Init(window *pixelgl.Window, bounds *pixel.Rect) error {
 	}
 
 	//Initialise the element part of the layout
-	err := e.Element.Init(window, bounds)
-	if err != nil {return err}
+	err := e.Impl.Init(window, bounds)
+	if err != nil {
+		return err
+	}
 
 	//The child's position
 	var childPos *pixel.Vec
@@ -183,10 +191,12 @@ func (e *LinearLayout) Init(window *pixelgl.Window, bounds *pixel.Rect) error {
 			X: e.GetMin().X + padding,
 			Y: e.GetMax().Y + padding,
 		}
-	} else {childPos = nil}
+	} else {
+		childPos = nil
+	}
 
 	//Initialise the children
-	var child element.IsElement
+	var child element.Element
 	for i := 0; i < e.NumChildren(); i++ {
 		child = e.GetChild(i)
 
@@ -215,11 +225,15 @@ func (e *LinearLayout) Init(window *pixelgl.Window, bounds *pixel.Rect) error {
 				if e.Orientation == util.HorizontalOrientation {
 					childPos.X += childSize.X
 				}
-			} else {childPos = nil}
+			} else {
+				childPos = nil
+			}
 
 			//Initialise the child
 			err := child.Init(window, childBounds)
-			if err != nil {return err}
+			if err != nil {
+				return err
+			}
 		}
 	}
 
@@ -231,14 +245,14 @@ func (e *LinearLayout) Init(window *pixelgl.Window, bounds *pixel.Rect) error {
 //Function that is called when there
 //is a new event
 func (e *LinearLayout) NewEvent(window *pixelgl.Window) {
-	e.Element.NewEvent(window)
-	e.Layout.NewEvent(window)
+	e.Impl.NewEvent(window)
+	e.LayoutImpl.NewEvent(window)
 }
 
 //Function to draw the element
 func (e *LinearLayout) Draw() {
 	//Draw the element
-	e.Element.Draw()
+	e.Impl.Draw()
 	//Draw the layout
 	element.DrawLayout(e)
 }

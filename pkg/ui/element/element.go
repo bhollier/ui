@@ -9,9 +9,9 @@ import (
 
 //Interface type for something
 //that is an element
-type IsElement interface {
+type Element interface {
 	//Function to get the element's parent
-	GetParent() IsLayout
+	GetParent() Layout
 
 	//Function to get the element's XML name
 	GetName() xml.Name
@@ -85,12 +85,12 @@ type IsElement interface {
 	GetCanvas() *pixelgl.Canvas
 
 	//All elements have a background
-	HasBkg
+	Bkg
 
 	//Function to unmarshal an XML element
 	//into a UI element. This function is
 	//usually only called by xml.Unmarshal
-	UnmarshalXML(d* xml.Decoder, start xml.StartElement) error
+	UnmarshalXML(d *xml.Decoder, start xml.StartElement) error
 
 	//Function to reset the element
 	Reset()
@@ -116,9 +116,9 @@ type IsElement interface {
 //Type for the implementation of a UI
 //element. Most elements should include
 //this at some point (but only once)
-type Element struct {
+type Impl struct {
 	//The element's parent
-	parent IsLayout
+	parent Layout
 
 	//The element's XML name
 	name xml.Name
@@ -154,17 +154,17 @@ type Element struct {
 	Canvas *pixelgl.Canvas
 
 	//The element's background
-	Bkg
+	BkgImpl
 
 	//The element's gravity
 	Gravity util.Gravity `uixml:"http://github.com/orfby/ui/api/schema gravity,optional"`
 }
 
 //Function to create an element
-func NewElement(name xml.Name, parent IsLayout) Element {
-	e := Element{
-		name: name,
-		parent: parent,
+func NewElement(name xml.Name, parent Layout) Impl {
+	e := Impl{
+		name:    name,
+		parent:  parent,
 		Gravity: util.DefaultGravity,
 		Padding: util.DefaultAbsoluteQuantity,
 	}
@@ -179,23 +179,29 @@ func NewElement(name xml.Name, parent IsLayout) Element {
 	}
 
 	//If the name has a namespace, then add it
-	if name.Space != "" {e.AddNamespace(name.Space)}
+	if name.Space != "" {
+		e.AddNamespace(name.Space)
+	}
 
 	return e
 }
 
 //Function to get the element's parent
-func (e *Element) GetParent() IsLayout {return e.parent}
+func (e *Impl) GetParent() Layout { return e.parent }
 
 //Function to get the element's name
-func (e *Element) GetName() xml.Name {return e.name}
+func (e *Impl) GetName() xml.Name { return e.name }
+
 //Function to get the element's namespaces
-func (e *Element) GetNamespaces() []string {return e.namespaces}
+func (e *Impl) GetNamespaces() []string { return e.namespaces }
+
 //Function to add a namespace to the
 //element
-func (e *Element) AddNamespace(namespace string) {
+func (e *Impl) AddNamespace(namespace string) {
 	for _, ns := range e.namespaces {
-		if ns == namespace {return}
+		if ns == namespace {
+			return
+		}
 	}
 	e.namespaces = append(e.namespaces, namespace)
 }
@@ -203,82 +209,93 @@ func (e *Element) AddNamespace(namespace string) {
 //Function to get the element's
 //ID (or nil, if it doesn't have
 //one)
-func (e *Element) GetID() *string {
-	if e.ID == "" {return nil} else {return &e.ID}
+func (e *Impl) GetID() *string {
+	if e.ID == "" {
+		return nil
+	} else {
+		return &e.ID
+	}
 }
 
 //Function to get the element's
 //relative width
-func (e *Element) GetRelWidth() util.RelativeSize {return e.RelativeWidth}
+func (e *Impl) GetRelWidth() util.RelativeSize { return e.RelativeWidth }
+
 //Function to get the element's
 //relative height
-func (e *Element) GetRelHeight() util.RelativeSize {return e.RelativeHeight}
+func (e *Impl) GetRelHeight() util.RelativeSize { return e.RelativeHeight }
 
 //Function to get the element's
 //actual width. If nil, it isn't
 //known yet
-func (e *Element) GetActualWidth() *float64 {return e.width}
+func (e *Impl) GetActualWidth() *float64 { return e.width }
+
 //Function to set the element's
 //actual width
-func (e *Element) SetActualWidth(width *float64) {e.width = width}
+func (e *Impl) SetActualWidth(width *float64) { e.width = width }
 
 //Function to get the element's
 //actual height. If nil, it isn't
 //known yet
-func (e *Element) GetActualHeight() *float64 {return e.height}
+func (e *Impl) GetActualHeight() *float64 { return e.height }
+
 //Function to set the element's
 //actual height
-func (e *Element) SetActualHeight(height *float64) {e.height = height}
+func (e *Impl) SetActualHeight(height *float64) { e.height = height }
 
 //Function to get the element's
 //minimum point. If nil, it isn't
 //known yet
-func (e *Element) GetMin() *pixel.Vec {return e.min}
+func (e *Impl) GetMin() *pixel.Vec { return e.min }
+
 //Function to set the element's
 //minimum point
-func (e *Element) SetMin(min *pixel.Vec) {e.min = min}
+func (e *Impl) SetMin(min *pixel.Vec) { e.min = min }
 
 //Function to get the element's
 //maximum point. If nil, it isn't
 //known yet
-func (e *Element) GetMax() *pixel.Vec {return e.max}
+func (e *Impl) GetMax() *pixel.Vec { return e.max }
+
 //Function to set the element's
 //maximum point
-func (e *Element) SetMax(max *pixel.Vec) {e.max = max}
+func (e *Impl) SetMax(max *pixel.Vec) { e.max = max }
 
 //Function to get the element's
 //bounds. If nil, either the min
 //or max isn't known
-func (e *Element) GetBounds() *pixel.Rect {
+func (e *Impl) GetBounds() *pixel.Rect {
 	if e.min != nil && e.max != nil {
 		return &pixel.Rect{
 			Min: *e.min,
 			Max: *e.max,
 		}
-	} else {return nil}
+	} else {
+		return nil
+	}
 }
 
 //Function to get the element's
 //padding
-func (e *Element) GetPadding() util.AbsoluteQuantity {return e.Padding}
+func (e *Impl) GetPadding() util.AbsoluteQuantity { return e.Padding }
 
 //Function to get the element's
 //gravity
-func (e *Element) GetGravity() util.Gravity {return e.Gravity}
+func (e *Impl) GetGravity() util.Gravity { return e.Gravity }
 
 //Function to get the element's
 //canvas
-func (e *Element) GetCanvas() *pixelgl.Canvas {return e.Canvas}
+func (e *Impl) GetCanvas() *pixelgl.Canvas { return e.Canvas }
 
 //Function to unmarshal an XML element into
 //an element. SetAttrs should've been called
 //before this function
-func (e *Element) UnmarshalXML(*xml.Decoder, xml.StartElement) (err error) {
+func (e *Impl) UnmarshalXML(*xml.Decoder, xml.StartElement) (err error) {
 	return nil
 }
 
 //Function to reset the element
-func (e *Element) Reset() {
+func (e *Impl) Reset() {
 	//Set the min and max to nil
 	e.min = nil
 	e.max = nil
@@ -291,16 +308,16 @@ func (e *Element) Reset() {
 //whether its width, height, position
 //and canvas are set (not nil) and if
 //it's background is initialised
-func (e *Element) IsInitialised() bool {
+func (e *Impl) IsInitialised() bool {
 	return e.GetMin() != nil &&
 		e.GetMax() != nil &&
 		e.GetCanvas() != nil &&
-		e.Bkg.IsInitialised()
+		e.BkgImpl.IsInitialised()
 }
 
 //Function to calculate an element's
 //width
-func CalculateWidth(parent IsElement, window *pixelgl.Window,
+func CalculateWidth(parent Element, window *pixelgl.Window,
 	relWidth util.RelativeSize) (width *float64) {
 	//If the width is just in pixels
 	if relWidth.Unit == util.Pixels {
@@ -350,7 +367,7 @@ func CalculateWidth(parent IsElement, window *pixelgl.Window,
 
 //Function to calculate an element's
 //height
-func CalculateHeight(parent IsElement, window *pixelgl.Window,
+func CalculateHeight(parent Element, window *pixelgl.Window,
 	relHeight util.RelativeSize) (height *float64) {
 	//If the height is just in pixels
 	if relHeight.Unit == util.Pixels {
@@ -379,7 +396,9 @@ func CalculateHeight(parent IsElement, window *pixelgl.Window,
 				if next.GetBounds() != nil {
 					newHeight := next.GetBounds().Size().Y
 					height = &newHeight
-				} else {height = nil}
+				} else {
+					height = nil
+				}
 			} else if next.GetBounds() != nil &&
 				relHeight.Unit == util.Percent {
 				newHeight := next.GetBounds().Size().Y * (float64(relHeight.Quantity) / 100)
@@ -398,7 +417,7 @@ func CalculateHeight(parent IsElement, window *pixelgl.Window,
 
 //Function to calculate an element's
 //minimum point
-func CalculateMin(e IsElement, bounds *pixel.Rect, size pixel.Vec) (min *pixel.Vec) {
+func CalculateMin(e Element, bounds *pixel.Rect, size pixel.Vec) (min *pixel.Vec) {
 	//If the bounds and the element's
 	//width and height are known
 	if bounds != nil {
@@ -430,7 +449,7 @@ func CalculateMin(e IsElement, bounds *pixel.Rect, size pixel.Vec) (min *pixel.V
 //size, it won't set the width or height
 //if the relative width or height is
 //"match_content"
-func (e *Element) Init(window *pixelgl.Window, bounds *pixel.Rect) error {
+func (e *Impl) Init(window *pixelgl.Window, bounds *pixel.Rect) error {
 	//If the width isn't known, try to calculate it
 	if e.width == nil {
 		e.width = CalculateWidth(e.GetParent(),
@@ -470,7 +489,9 @@ func (e *Element) Init(window *pixelgl.Window, bounds *pixel.Rect) error {
 
 	//Initialise the background
 	err := InitBkg(e, bounds)
-	if err != nil {return err}
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -478,10 +499,10 @@ func (e *Element) Init(window *pixelgl.Window, bounds *pixel.Rect) error {
 //Function that is called when there
 //is a new event. This function does
 //nothing
-func (e *Element) NewEvent(*pixelgl.Window) {}
+func (e *Impl) NewEvent(*pixelgl.Window) {}
 
 //Function to draw the element
-func (e *Element) Draw() {
+func (e *Impl) Draw() {
 	//Draw the background
 	DrawBkg(e)
 }

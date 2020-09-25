@@ -11,31 +11,35 @@ import (
 //Element type for a text button
 type TextButton struct {
 	//A text button is a button
-	element.Button
+	element.ButtonImpl
 
 	//It has text
-	element.Text
+	element.TextImpl
 }
 
 //Function to create a new text button
-func NewTextButton(name xml.Name, parent element.IsLayout) element.IsElement {
-	return &TextButton{Button: element.NewButton(name, parent)}
+func NewTextButton(name xml.Name, parent element.Layout) element.Element {
+	return &TextButton{ButtonImpl: element.NewButton(name, parent)}
 }
 
 //The XML name of the element
-var TextButtonTypeName = xml.Name{Space: "http://github.com/orfby/ui/api/schema", Local:"TextButton"}
+var TextButtonTypeName = xml.Name{Space: "http://github.com/orfby/ui/api/schema", Local: "TextButton"}
 
 //Function to unmarshal an XML element into
 //an element. This function is usually only
 //called by xml.Unmarshal
-func (e *TextButton) UnmarshalXML(d* xml.Decoder, start xml.StartElement) (err error) {
+func (e *TextButton) UnmarshalXML(d *xml.Decoder, start xml.StartElement) (err error) {
 	//Unmarshal the button
-	err = e.Button.UnmarshalXML(d, start)
-	if err != nil {return err}
+	err = e.ButtonImpl.UnmarshalXML(d, start)
+	if err != nil {
+		return err
+	}
 
 	//Set the element's attributes
 	err = element.SetAttrs(e, start.Attr)
-	if err != nil {return err}
+	if err != nil {
+		return err
+	}
 
 	//If no text was given
 	if e.GetTextField() == "" {
@@ -57,19 +61,23 @@ func (e *TextButton) UnmarshalXML(d* xml.Decoder, start xml.StartElement) (err e
 //Function to determine whether
 //the element is initialised
 func (e *TextButton) IsInitialised() bool {
-	return e.Button.IsInitialised() &&
-		e.Text.IsInitialised()
+	return e.ButtonImpl.IsInitialised() &&
+		e.TextImpl.IsInitialised()
 }
 
 //Function to initialise the element
 func (e *TextButton) Init(window *pixelgl.Window, bounds *pixel.Rect) error {
 	//Initialise the button
-	err := e.Button.Init(window, bounds)
-	if err != nil {return err}
+	err := e.ButtonImpl.Init(window, bounds)
+	if err != nil {
+		return err
+	}
 
 	//Initialise the button's text
 	err = element.InitText(e, bounds)
-	if err != nil {return err}
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -83,7 +91,7 @@ func (e *TextButton) NewEvent(window *pixelgl.Window) {
 //Function to draw the element
 func (e *TextButton) Draw() {
 	//Draw the button
-	e.Button.Draw()
+	e.ButtonImpl.Draw()
 	//Draw the text
 	element.DrawText(e)
 }

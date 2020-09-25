@@ -4,9 +4,9 @@ package element
 //attribute's element ID doesn't
 //match an actual ID
 type NoElemError struct {
-	Element IsElement
+	Element      Element
 	ReferencedID string
-	AttrName string
+	AttrName     string
 }
 
 //Function to create a NoElemError.
@@ -15,7 +15,7 @@ type NoElemError struct {
 //being referenced (that doesn't exist),
 //and attrName is the name of the attribute
 //asking for the ID
-func NewNoElemError(elem IsElement, refElem string, attrName string) NoElemError {
+func NewNoElemError(elem Element, refElem string, attrName string) NoElemError {
 	return NoElemError{elem, refElem, attrName}
 }
 

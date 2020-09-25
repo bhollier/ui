@@ -12,16 +12,16 @@ func main() {
 	//Run everything on pixelgl's thread
 	pixelgl.Run(func() {
 		//Register a callback
-		element.RegisterCallback("testcallback", func(element.IsElement) error {
+		element.RegisterCallback("testcallback", func(element.Element) error {
 			log.Printf("*fart noise*")
 			return nil
 		})
 
 		//Create a new test design
-		design, err := ui.NewDesign("./assets/ui/designs/main.xml",
+		design, err := ui.NewDesign("./assets/ui/designs/test.xml",
 			pixelgl.WindowConfig{
-			Bounds: pixel.R(0, 0, 800, 600),
-			Title: "test",
+				Bounds: pixel.R(0, 0, 800, 600),
+				Title:  "test",
 			})
 		if err != nil {
 			log.Fatalf("Fatal error: %+v", err)
