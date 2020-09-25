@@ -14,4 +14,6 @@ func init() {
 		reflect.TypeOf((*Image)(nil)).Elem(), NewImage)
 	element.Register(ImportTypeName,
 		reflect.TypeOf((*Import)(nil)).Elem(), NewImport)
+	element.Register(ScrollTypeName,
+		reflect.TypeOf((*Scroll)(nil)).Elem(), NewScroll)
 }

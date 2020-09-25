@@ -1,10 +1,8 @@
 package element
 
 import (
-	"errors"
 	"github.com/faiface/pixel"
 	"github.com/orfby/ui/pkg/ui/util"
-	"image"
 	"image/color"
 )
 
@@ -31,6 +29,9 @@ type BkgImpl struct {
 	//The element's background
 	//from xml
 	BackgroundField string `uixml:"http://github.com/orfby/ui/api/schema background,optional"`
+	//The element's background
+	//picture
+	picture pixel.Picture
 	//The element's background
 	//sprite
 	sprite *pixel.Sprite
@@ -72,42 +73,6 @@ func (e *BkgImpl) IsInitialised() bool {
 		e.GetBkgSprite() != nil
 }
 
-//Function to create a sprite
-//from an XML string
-//todo move me somewhere more applicable
-func CreateSpriteFromField(field string) (*pixel.Sprite, error) {
-	if field != "" {
-		//If the first character is a hash
-		if field[0] == '#' {
-			//Convert the field to a colour type
-			colour, err := util.ParseColor(field)
-			if err != nil {
-				return nil, errors.New("invalid colour attribute value '" + field + "'")
-			}
-			//Create a 1x1 image
-			img := image.NewRGBA(image.Rect(0, 0, 2, 2))
-			for y := img.Bounds().Min.Y; y < img.Bounds().Max.Y; y++ {
-				for x := img.Bounds().Min.X; x < img.Bounds().Max.X; x++ {
-					img.SetRGBA(x, y, colour)
-				}
-			}
-			//Convert it to a pixel picture
-			pic := pixel.PictureDataFromImage(img)
-			//Create a sprite from the picture
-			return pixel.NewSprite(pic, pic.Bounds()), nil
-		} else {
-			//Load the picture
-			pic, err := util.LoadPicture(field)
-			if err != nil {
-				return nil, err
-			}
-			//Create a sprite from the picture
-			return pixel.NewSprite(pic, pic.Bounds()), nil
-		}
-	}
-	return nil, nil
-}
-
 //Function to initialise an element's
 //background. Doesn't call element.Init.
 //Should be called last (as the size of
@@ -118,12 +83,16 @@ func InitBkg(e Bkg, bounds *pixel.Rect) error {
 	if bounds != nil {
 		//If the sprite doesn't exist
 		if e.GetBkgSprite() == nil {
-			//Create the background
-			sprite, err := CreateSpriteFromField(e.GetBkgField())
+			//Load the background
+			picture, err := util.CreatePictureFromField(e.GetBkgField())
 			if err != nil {
 				return err
 			}
-			e.SetBkgSprite(sprite)
+			if picture != nil {
+				//Create the sprite
+				sprite := pixel.NewSprite(picture, picture.Bounds())
+				e.SetBkgSprite(sprite)
+			}
 		}
 	}
 
@@ -134,6 +103,11 @@ func InitBkg(e Bkg, bounds *pixel.Rect) error {
 //of an element. This function
 //should be called first
 func DrawBkg(e Element) {
+	//Clear the canvas (with a transparent background)
+	//(this is why it's important the background is
+	//drawn first)
+	e.GetCanvas().Clear(color.Transparent)
+
 	//Draw the background sprite, if it exists
 	if e.GetBkgSprite() != nil {
 		//If the background should repeat
@@ -162,12 +136,5 @@ func DrawBkg(e Element) {
 			//Draw the background
 			e.GetBkgSprite().Draw(e.GetCanvas(), mat)
 		}
-
-		//If there isn't a background
-	} else {
-		//Clear the canvas (with a transparent background)
-		//(this is why it's important the background is
-		//drawn first)
-		e.GetCanvas().Clear(color.Transparent)
 	}
 }

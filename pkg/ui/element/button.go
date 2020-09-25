@@ -4,6 +4,7 @@ import (
 	"encoding/xml"
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
+	"github.com/orfby/ui/pkg/ui/util"
 	"log"
 )
 
@@ -158,26 +159,27 @@ func (e *ButtonImpl) Init(window *pixelgl.Window, bounds *pixel.Rect) error {
 		}
 		//If the hovered background hasn't been made
 		if e.backgrounds[ButtonHoveredState] == nil {
-			//Create the background
-			sprite, err := CreateSpriteFromField(e.HoveredBackground)
+			//Load the background picture
+			picture, err := util.CreatePictureFromField(e.HoveredBackground)
 			if err != nil {
 				return err
 			}
-			if sprite != nil {
-				e.backgrounds[ButtonHoveredState] = sprite
+			if picture != nil {
+				//Create a sprite
+				e.backgrounds[ButtonHoveredState] = pixel.NewSprite(picture, picture.Bounds())
 			} else {
 				e.backgrounds[ButtonHoveredState] = e.backgrounds[ButtonDefaultState]
 			}
 		}
 		//If the pressed background hasn't been made
 		if e.backgrounds[ButtonPressedState] == nil {
-			//Create the background
-			sprite, err := CreateSpriteFromField(e.PressedBackground)
+			//Load the background picture
+			picture, err := util.CreatePictureFromField(e.PressedBackground)
 			if err != nil {
 				return err
 			}
-			if sprite != nil {
-				e.backgrounds[ButtonPressedState] = sprite
+			if picture != nil {
+				e.backgrounds[ButtonPressedState] = pixel.NewSprite(picture, picture.Bounds())
 			} else {
 				e.backgrounds[ButtonPressedState] = e.backgrounds[ButtonDefaultState]
 			}
@@ -218,13 +220,7 @@ func ButtonNewEvent(e HasButton, window *pixelgl.Window) {
 
 	//If the state was changed
 	if stateChange {
-		//Draw the button
-		e.Draw()
-		//Draw the button onto
-		//the window
-		DrawCanvasOntoParent(e.GetCanvas(), window.Canvas())
-		//Swap the buffers
-		window.SwapBuffers()
-		//todo this isn't good
+		//Redraw the whole UI
+		DrawUI(e, window)
 	}
 }

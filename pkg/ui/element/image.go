@@ -2,6 +2,7 @@ package element
 
 import (
 	"github.com/faiface/pixel"
+	"github.com/orfby/ui/pkg/ui/util"
 )
 
 //Interface for an element with an image
@@ -60,12 +61,14 @@ func (e *ImageImpl) IsInitialised() bool {
 func InitImage(e HasImage) error {
 	//If the image hasn't been made yet
 	if e.GetImageSprite() == nil {
-		//Create the image
-		sprite, err := CreateSpriteFromField(e.GetImageField())
+		//Load the image
+		picture, err := util.CreatePictureFromField(e.GetImageField())
 		if err != nil {
 			return err
 		}
-		e.SetImageSprite(sprite)
+		if picture != nil {
+			e.SetImageSprite(pixel.NewSprite(picture, picture.Bounds()))
+		}
 	}
 
 	//If the sprite has been created

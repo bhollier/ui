@@ -299,8 +299,6 @@ func (e *Impl) Reset() {
 	//Set the min and max to nil
 	e.min = nil
 	e.max = nil
-	//Set the canvas to nil
-	e.Canvas = nil
 }
 
 //Function to determine whether the
@@ -312,6 +310,7 @@ func (e *Impl) IsInitialised() bool {
 	return e.GetMin() != nil &&
 		e.GetMax() != nil &&
 		e.GetCanvas() != nil &&
+		e.GetCanvas().Bounds() == *e.GetBounds() &&
 		e.BkgImpl.IsInitialised()
 }
 
@@ -480,11 +479,15 @@ func (e *Impl) Init(window *pixelgl.Window, bounds *pixel.Rect) error {
 		}
 	}
 
-	//If the canvas hasn't been made and
-	//the bounds of the element are known
-	if e.Canvas == nil && e.GetBounds() != nil {
-		//Create a canvas
-		e.Canvas = pixelgl.NewCanvas(*e.GetBounds())
+	//If the bounds are known
+	if e.GetBounds() != nil {
+		//If the canvas hasn't been made
+		if e.Canvas == nil {
+			//Create a canvas
+			e.Canvas = pixelgl.NewCanvas(*e.GetBounds())
+		} else {
+			e.Canvas.SetBounds(*e.GetBounds())
+		}
 	}
 
 	//Initialise the background
@@ -518,4 +521,20 @@ func DrawCanvasOntoParent(child *pixelgl.Canvas, parent *pixelgl.Canvas) {
 	mat = mat.Moved(child.Bounds().Center())
 	//Draw the child canvas onto the parent
 	child.Draw(parent, mat)
+}
+
+//Function to draw the entire UI element
+//tree, by traversing up the given
+//element's parents
+func DrawUI(e Element, window *pixelgl.Window) {
+	//While the element has a parent, go up the tree
+	for e.GetParent() != nil {
+		e = e.GetParent()
+	}
+	//Draw the element
+	e.Draw()
+	//Draw the element onto the window
+	DrawCanvasOntoParent(e.GetCanvas(), window.Canvas())
+	//Swap the window's buffers
+	window.SwapBuffers()
 }

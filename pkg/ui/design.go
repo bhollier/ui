@@ -132,11 +132,7 @@ func (d *Design) update(root *element.Root) error {
 	}
 
 	//Draw the design
-	root.Draw()
-	//Draw the root onto the window
-	element.DrawCanvasOntoParent(root.Element.GetCanvas(), d.window.Canvas())
-	//Swap the window's buffers
-	d.window.SwapBuffers()
+	element.DrawUI(root.Element, d.window)
 
 	return nil
 }
@@ -148,39 +144,45 @@ func (d *Design) pollEvents() {
 		//Wait for a new event
 		d.window.UpdateInputWait(time.Second)
 
-		//If ctrl + shift + r was pressed
-		if d.window.Pressed(pixelgl.KeyLeftControl) &&
-			d.window.Pressed(pixelgl.KeyLeftShift) &&
-			d.window.JustPressed(pixelgl.KeyR) {
-			//Create a new root root
-			log.Printf("Loading XML design from '" + d.path + "'...")
-			newRoot, err := element.NewRoot(nil, d.path)
-			if err != nil {
-				log.Printf("Error reloading XML: %+v", err)
+		//Make sure the window is in focus
+		if d.window.Focused() {
+			//If ctrl + shift + r was pressed
+			if d.window.Pressed(pixelgl.KeyLeftControl) &&
+				d.window.Pressed(pixelgl.KeyLeftShift) &&
+				d.window.JustPressed(pixelgl.KeyR) {
+				//Create a new root root
+				log.Printf("Loading XML design from '" + d.path + "'...")
+				newRoot, err := element.NewRoot(nil, d.path)
+				if err != nil {
+					log.Printf("Error reloading XML: %+v", err)
+				}
+
+				//Do an initial design update
+				log.Printf("Initialising design...")
+				err = d.update(newRoot)
+
+				//Set the new root
+				d.root.Element = newRoot.Element
+
+				//If the window bounds changed
+			} else if d.prevWindowBounds != d.window.Bounds() {
+				//todo  update periodically (in case the
+				//todo  ui needs to be updated for some reason)
+				//Update the design
+				err := d.update(d.root)
+				if err != nil {
+					log.Fatalf("Fatal error: %+v", err)
+				}
 			}
 
-			//Do an initial design update
-			log.Printf("Initialising design...")
-			err = d.update(newRoot)
+			//Tell the root element
+			//there was a new event
+			/*go */
+			d.root.NewEvent(d.window)
 
-			//Set the new root
-			d.root.Element = newRoot.Element
-
-			//If the window bounds changed
-		} else if d.prevWindowBounds != d.window.Bounds() {
-			//todo  update periodically (in case the
-			//todo  ui needs to be updated for some reason)
-			//Update the design
-			err := d.update(d.root)
-			if err != nil {
-				log.Fatalf("Fatal error: %+v", err)
-			}
+			//Draw the design
+			element.DrawUI(d.root.Element, d.window)
 		}
-
-		//Tell the root element
-		//there was a new event
-		/*go */
-		d.root.NewEvent(d.window)
 
 		//Wait a bit before the next event
 		//time.Sleep(time.Second / 50)
@@ -190,6 +192,9 @@ func (d *Design) pollEvents() {
 	//waiting for the design to close
 	d.waitCondVar.Broadcast()
 }
+
+//Function to get the design's window
+func (d *Design) GetWindow() *pixelgl.Window { return d.window }
 
 //Function to wait for the design to close
 func (d *Design) Wait() error {
