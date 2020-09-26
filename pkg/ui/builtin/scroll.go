@@ -142,38 +142,56 @@ func (e *Scroll) NewEvent(window *pixelgl.Window) {
 	scroll := window.MouseScroll()
 	//If the scroll wheel moved
 	if scroll != pixel.V(0, 0) {
-		//Move the child's bounds
-		e.childBounds.Min.X += scroll.X * float64(e.ScrollRate)
-		e.childBounds.Max.Y -= scroll.Y * float64(e.ScrollRate)
+		//Copy the current bounds
+		prevBounds := *e.childBounds
 
-		//If the X child bounds are going too far
-		if e.childBounds.Min.X > e.parentBounds.Min.X {
-			e.childBounds.Min.X = e.parentBounds.Min.X
-		} else if e.childBounds.Min.X < *e.Children[0].GetActualWidth() {
-			e.childBounds.Min.X = *e.Children[0].GetActualWidth()
-		}
-		//If the Y child bounds are going too far
-		if e.childBounds.Max.Y < e.parentBounds.Max.Y {
-			e.childBounds.Max.Y = e.parentBounds.Max.Y
-		} else if e.childBounds.Max.Y > *e.Children[0].GetActualHeight() {
-			e.childBounds.Max.Y = *e.Children[0].GetActualHeight()
-		}
+		//Only X scroll if the child's width is larger than the bounds
+		if *e.Children[0].GetActualWidth() > e.parentBounds.Size().X {
+			//Move the child's X bounds
+			e.childBounds.Min.X += scroll.X * float64(e.ScrollRate)
 
-		//Reset the child element
-		e.Children[0].Reset()
-		//While the child is uninitialised
-		for !e.Children[0].IsInitialised() {
-			//Initialise it
-			err := e.Children[0].Init(window, e.childBounds)
-			if err != nil {
-				log.Printf("Error while initialsing XML element '"+
-					element.FullName(e.Children[0], ".", true)+
-					"': %+v", err)
+			//If the bounds are going too far
+			if e.childBounds.Min.X >= e.parentBounds.Min.X {
+				e.childBounds.Min.X = e.parentBounds.Min.X
+			} else if e.childBounds.Min.X <= e.childBounds.Max.X+
+				*e.Children[0].GetActualWidth() {
+				e.childBounds.Min.X = e.childBounds.Max.X +
+					*e.Children[0].GetActualWidth()
 			}
 		}
 
-		//Redraw the UI
-		element.DrawUI(e, window)
+		//Only Y scroll if the child's height is larger than the bounds
+		if *e.Children[0].GetActualHeight() > e.parentBounds.Size().Y {
+			//Move the child's Y bounds
+			e.childBounds.Max.Y -= scroll.Y * float64(e.ScrollRate)
+
+			//If the bounds are going too far
+			if e.childBounds.Max.Y <= e.parentBounds.Max.Y {
+				e.childBounds.Max.Y = e.parentBounds.Max.Y
+			} else if e.childBounds.Max.Y >= e.childBounds.Min.Y+
+				*e.Children[0].GetActualHeight() {
+				e.childBounds.Max.Y = e.childBounds.Min.Y +
+					*e.Children[0].GetActualHeight()
+			}
+		}
+
+		//If the scroll moved
+		if prevBounds != *e.childBounds {
+			//Reset the child element
+			e.Children[0].Reset()
+			//While the child is uninitialised
+			for !e.Children[0].IsInitialised() {
+				//Initialise it
+				err := e.Children[0].Init(window, e.childBounds)
+				if err != nil {
+					log.Printf("Error while initialsing XML element '"+
+						element.FullName(e.Children[0], ".", true)+
+						"': %+v", err)
+				}
+			}
+			//Redraw the UI
+			element.DrawUI(e, window)
+		}
 	}
 }
 
