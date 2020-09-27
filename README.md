@@ -12,5 +12,7 @@ At present there are 7 built-in UI elements:
 + TextButton
 + Image
 + Import
++ Scroll
++ FixedRatio
 
 More elements + proper documentation coming soon!
