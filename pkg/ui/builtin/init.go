@@ -10,6 +10,8 @@ import (
 //Function to register the built-in types
 func init() {
 	//Register the built-in element types
+	element.Register(FixedRatioTypeName,
+		reflect.TypeOf((*FixedRatio)(nil)).Elem(), NewFixedRatio)
 	element.Register(ImageTypeName,
 		reflect.TypeOf((*Image)(nil)).Elem(), NewImage)
 	element.Register(ImportTypeName,

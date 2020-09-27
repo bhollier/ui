@@ -20,7 +20,6 @@ type Design struct {
 	//The window's previous
 	//bounds
 	prevWindowBounds pixel.Rect
-	//The window's canvas
 
 	//The path to the root element
 	path string
@@ -166,8 +165,6 @@ func (d *Design) pollEvents() {
 
 				//If the window bounds changed
 			} else if d.prevWindowBounds != d.window.Bounds() {
-				//todo  update periodically (in case the
-				//todo  ui needs to be updated for some reason)
 				//Update the design
 				err := d.update(d.root)
 				if err != nil {
@@ -198,8 +195,12 @@ func (d *Design) GetWindow() *pixelgl.Window { return d.window }
 
 //Function to wait for the design to close
 func (d *Design) Wait() error {
-	//Wait for the design to close
 	d.Lock()
+	//If the window is already closed
+	if d.window.Closed() {
+		return nil
+	}
+	//Wait for the design to close
 	d.waitCondVar.Wait()
 	return nil
 }

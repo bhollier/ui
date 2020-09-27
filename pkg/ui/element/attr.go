@@ -187,6 +187,14 @@ func init() {
 			}
 			return reflect.ValueOf(val), nil
 		},
+		//Parsing a "util.Ratio" type
+		reflect.TypeOf((*util.Ratio)(nil)).Elem(): func(attr string) (reflect.Value, error) {
+			val, err := util.ParseRatio(attr)
+			if err != nil {
+				return reflect.Value{}, err
+			}
+			return reflect.ValueOf(val), nil
+		},
 		//Parsing a "util.Orientation" type
 		reflect.TypeOf((*util.Orientation)(nil)).Elem(): func(attr string) (reflect.Value, error) {
 			val, err := util.ParseOrientation(attr, util.DefaultOrientation)

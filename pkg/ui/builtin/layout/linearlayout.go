@@ -237,8 +237,6 @@ func (e *LinearLayout) Init(window *pixelgl.Window, bounds *pixel.Rect) error {
 		}
 	}
 
-	//todo children outside of bounds
-
 	return nil
 }
 

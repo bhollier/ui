@@ -157,7 +157,8 @@ func (e *GridLayout) Init(window *pixelgl.Window, bounds *pixel.Rect) error {
 	} else {
 		//Otherwise calculate the minimum from the relative width
 		//(with the layout itself as the parent)
-		actualCellWidth = element.CalculateWidth(e, window, e.CellWidth)
+		//todo cell width can't be match_bounds
+		actualCellWidth = element.CalculateWidth(e, window, nil, e.CellWidth)
 	}
 
 	//If the actual cell width is still known
@@ -194,7 +195,8 @@ func (e *GridLayout) Init(window *pixelgl.Window, bounds *pixel.Rect) error {
 	} else {
 		//Otherwise calculate the minimum from the relative height
 		//(with the layout itself as the parent)
-		actualCellHeight = element.CalculateHeight(e, window, e.CellHeight)
+		//todo cell width can't be match_bounds
+		actualCellHeight = element.CalculateHeight(e, window, nil, e.CellHeight)
 	}
 
 	//If the actual cell height is still known

@@ -12,6 +12,7 @@ type Unit string
 
 //Const for a unit of pixels
 const Pixels = Unit("px")
+
 //Const for a percentage "unit"
 const Percent = Unit("%")
 
@@ -44,6 +45,7 @@ type RelativeQuantity struct {
 //A "zero" relative quantity, as in one where
 //all the fields are zero values
 var ZeroRelativeQuantity = RelativeQuantity{}
+
 //The default relative quantity
 var DefaultRelativeQuantity = RelativeQuantity{Quantity: 0, Unit: Pixels}
 
@@ -52,7 +54,9 @@ var DefaultRelativeQuantity = RelativeQuantity{Quantity: 0, Unit: Pixels}
 func ParseRelativeQuantity(str string) (size RelativeQuantity, err error) {
 	//Remove all the whitespace from the string
 	strMod := strings.Map(func(r rune) rune {
-		if unicode.IsSpace(r) {return -1}
+		if unicode.IsSpace(r) {
+			return -1
+		}
 		return r
 	}, str)
 	//Convert the string to lowercase
@@ -67,7 +71,7 @@ func ParseRelativeQuantity(str string) (size RelativeQuantity, err error) {
 	}
 
 	//Convert the start of the string to an int
-	quantity, err := strconv.ParseInt(strMod[:lastDigit + 1], 10, 32)
+	quantity, err := strconv.ParseInt(strMod[:lastDigit+1], 10, 32)
 	if err != nil {
 		return RelativeQuantity{}, errors.New("invalid quantity '" + str + "'")
 	}
@@ -79,7 +83,7 @@ func ParseRelativeQuantity(str string) (size RelativeQuantity, err error) {
 	}
 
 	//Convert the unit
-	size.Unit, err = ParseUnit(strMod[lastDigit + 1:])
+	size.Unit, err = ParseUnit(strMod[lastDigit+1:])
 	if err != nil {
 		return RelativeQuantity{}, errors.New("invalid quantity '" + str + "'")
 	}
@@ -96,9 +100,16 @@ type RelativeSize struct {
 	//same as the parent element
 	MatchParent bool
 
+	//todo fill_parent
+
 	//Whether the quantity is the
 	//same as the element's content
 	MatchContent bool
+
+	//Whether the quantity is the
+	//same as the bounds from the
+	//parent
+	MatchBounds bool
 
 	//The quantity itself. Zero if
 	//MatchParent or MatchContent
@@ -109,6 +120,7 @@ type RelativeSize struct {
 //A "zero" relative quantity, as in one where
 //all the fields are zero values
 var ZeroRelativeSize = RelativeSize{}
+
 //The default relative quantity
 var DefaultRelativeSize = RelativeSize{RelativeQuantity: DefaultRelativeQuantity}
 
@@ -117,7 +129,9 @@ var DefaultRelativeSize = RelativeSize{RelativeQuantity: DefaultRelativeQuantity
 func ParseRelativeSize(str string) (size RelativeSize, err error) {
 	//Remove all the whitespace from the string
 	strMod := strings.Map(func(r rune) rune {
-		if unicode.IsSpace(r) {return -1}
+		if unicode.IsSpace(r) {
+			return -1
+		}
 		return r
 	}, str)
 	//Convert the string to lowercase
@@ -132,9 +146,16 @@ func ParseRelativeSize(str string) (size RelativeSize, err error) {
 		size.MatchContent = true
 		return size, nil
 	}
+	//If the string is equal to "match_bounds"
+	if strMod == "match_bounds" {
+		size.MatchBounds = true
+		return size, nil
+	}
 
 	//Otherwise convert it to a relative quantity
 	quantity, err := ParseRelativeQuantity(strMod)
-	if err != nil {return RelativeSize{}, err}
+	if err != nil {
+		return RelativeSize{}, err
+	}
 	return RelativeSize{RelativeQuantity: quantity}, nil
 }

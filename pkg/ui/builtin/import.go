@@ -9,7 +9,7 @@ import (
 
 //Type for an element that imports another design
 type Import struct {
-	//The import node is an element
+	//The import element is an element
 	element.Impl
 	//It is also (technically) a layout
 	element.LayoutImpl

@@ -296,6 +296,9 @@ func (e *Impl) UnmarshalXML(*xml.Decoder, xml.StartElement) (err error) {
 
 //Function to reset the element
 func (e *Impl) Reset() {
+	//Set the width and height to nil
+	e.width = nil
+	e.height = nil
 	//Set the min and max to nil
 	e.min = nil
 	e.max = nil
@@ -317,19 +320,26 @@ func (e *Impl) IsInitialised() bool {
 //Function to calculate an element's
 //width
 func CalculateWidth(parent Element, window *pixelgl.Window,
-	relWidth util.RelativeSize) (width *float64) {
+	bounds *pixel.Rect, relWidth util.RelativeSize) (width *float64) {
 	//If the width is just in pixels
 	if relWidth.Unit == util.Pixels {
 		//Set the actual width as the number of pixels
 		newWidth := float64(relWidth.Quantity)
 		width = &newWidth
 
+		//If the width depends on the bounds
+	} else if relWidth.MatchBounds {
+		if bounds != nil {
+			newWidth := bounds.Size().X
+			return &newWidth
+		} else {
+			//todo check that the parent doesn't match_content
+			return
+		}
+
 		//If the width depends on the parent
 	} else if relWidth.MatchParent ||
 		relWidth.Unit == util.Percent {
-		//todo  match_parent should fill the parent,
-		//todo  not match its width
-
 		//Go up the hierarchy until a parent
 		//is found that doesn't depend on it's
 		//child's width
@@ -367,12 +377,21 @@ func CalculateWidth(parent Element, window *pixelgl.Window,
 //Function to calculate an element's
 //height
 func CalculateHeight(parent Element, window *pixelgl.Window,
-	relHeight util.RelativeSize) (height *float64) {
+	bounds *pixel.Rect, relHeight util.RelativeSize) (height *float64) {
 	//If the height is just in pixels
 	if relHeight.Unit == util.Pixels {
 		//Set the actual height as the number of pixels
 		newHeight := float64(relHeight.Quantity)
 		height = &newHeight
+
+		//If the height depends on the bounds
+	} else if relHeight.MatchBounds {
+		if bounds != nil {
+			newHeight := bounds.Size().Y
+			return &newHeight
+		} else {
+			return
+		}
 
 		//If the height depends on the parent
 	} else if relHeight.MatchParent ||
@@ -452,12 +471,12 @@ func (e *Impl) Init(window *pixelgl.Window, bounds *pixel.Rect) error {
 	//If the width isn't known, try to calculate it
 	if e.width == nil {
 		e.width = CalculateWidth(e.GetParent(),
-			window, e.GetRelWidth())
+			window, bounds, e.GetRelWidth())
 	}
 	//If the height isn't known, try to calculate it
 	if e.height == nil {
 		e.height = CalculateHeight(e.GetParent(),
-			window, e.GetRelHeight())
+			window, bounds, e.GetRelHeight())
 	}
 
 	//If the bounds aren't known and
