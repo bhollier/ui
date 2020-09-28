@@ -10,9 +10,7 @@
             builtin:width="100px"
             builtin:height="100px"
             builtin:gravity="center"
-            builtin:background="#00000055"
-            builtin:source="images/frog2.png"
-            builtin:scale="fill"/>
+            builtin:background="#00000055"/>
     <TextButton
             builtin:width="100px"
             builtin:height="50px"
@@ -30,6 +28,5 @@
             builtin:background="#FF0000"
             builtin:bkg-hovered="#FFFF00"
             builtin:bkg-pressed="#00FF00"
-            builtin:source="images/frog.png"
             builtin:press-callback="testcallback"/>
 </GridLayout>

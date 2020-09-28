@@ -5,21 +5,20 @@
         builtin:background="./assets/ui/images/scalebkg-50px.png"
         builtin:bkg-repeat="true">
     <Image
-            builtin:id="frog"
+            builtin:id="img1"
             builtin:width="100px"
             builtin:height="100px"
             builtin:gravity="center"
-            builtin:left-of="frog2"
-            builtin:background="#00000088"
-            builtin:source="./assets/ui/images/frog.png">
+            builtin:left-of="img2"
+            builtin:source="#FF0000">
     </Image>
     <Image
-            builtin:id="frog2"
+            builtin:id="img2"
             builtin:width="100px"
             builtin:height="100px"
             builtin:gravity="left"
-            builtin:right-of="frog"
+            builtin:right-of="img1"
             builtin:background="#00000088"
-            builtin:source="./assets/ui/images/frog.png">
+            builtin:source="#00FF00">
     </Image>
 </RelativeLayout>
