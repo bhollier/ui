@@ -6,6 +6,7 @@ import (
 	"github.com/faiface/pixel/pixelgl"
 	"github.com/orfby/ui/pkg/ui"
 	"log"
+	"net/http"
 	"os"
 	"runtime/pprof"
 )
@@ -29,6 +30,9 @@ func main() {
 	//Get the path
 	path := flag.Arg(0)
 
+	//Open the ui assets folder
+	uiDir := http.Dir("./assets/ui")
+
 	//Run the design stuff on the pixelgl thread
 	pixelgl.Run(func() {
 		//If the CPU profile was given
@@ -48,7 +52,7 @@ func main() {
 		}
 
 		//Create a new design
-		design, err := ui.NewDesign(path,
+		design, err := ui.NewDesign(uiDir, path,
 			pixelgl.WindowConfig{
 				Bounds: pixel.R(0, 0, *width, *height),
 				Title:  path,

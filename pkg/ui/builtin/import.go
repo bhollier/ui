@@ -5,6 +5,7 @@ import (
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
 	"github.com/orfby/ui/pkg/ui/element"
+	"net/http"
 )
 
 //Type for an element that imports another design
@@ -19,8 +20,8 @@ type Import struct {
 }
 
 //Function to create a new import element
-func NewImport(name xml.Name, parent element.Layout) element.Element {
-	return &Import{Impl: element.NewElement(name, parent)}
+func NewImport(fs http.FileSystem, name xml.Name, parent element.Layout) element.Element {
+	return &Import{Impl: element.NewElement(fs, name, parent)}
 }
 
 //The XML name of the import element
@@ -43,7 +44,7 @@ func (e *Import) UnmarshalXML(d *xml.Decoder, start xml.StartElement) (err error
 	}
 
 	//Create the root
-	root, err := element.NewRoot(e, e.Path)
+	root, err := element.NewRoot(e.GetFS(), e, e.Path)
 	if err != nil {
 		return err
 	}

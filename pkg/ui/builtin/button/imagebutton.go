@@ -6,6 +6,7 @@ import (
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
 	"github.com/orfby/ui/pkg/ui/element"
+	"net/http"
 )
 
 //Element type for an image button
@@ -18,8 +19,8 @@ type ImageButton struct {
 }
 
 //Function to create a new image button
-func NewImageButton(name xml.Name, parent element.Layout) element.Element {
-	return &ImageButton{ButtonImpl: element.NewButton(name, parent)}
+func NewImageButton(fs http.FileSystem, name xml.Name, parent element.Layout) element.Element {
+	return &ImageButton{ButtonImpl: element.NewButton(fs, name, parent)}
 }
 
 //The XML name of the element

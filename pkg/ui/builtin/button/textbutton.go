@@ -6,6 +6,7 @@ import (
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
 	"github.com/orfby/ui/pkg/ui/element"
+	"net/http"
 )
 
 //Element type for a text button
@@ -18,8 +19,8 @@ type TextButton struct {
 }
 
 //Function to create a new text button
-func NewTextButton(name xml.Name, parent element.Layout) element.Element {
-	return &TextButton{ButtonImpl: element.NewButton(name, parent)}
+func NewTextButton(fs http.FileSystem, name xml.Name, parent element.Layout) element.Element {
+	return &TextButton{ButtonImpl: element.NewButton(fs, name, parent)}
 }
 
 //The XML name of the element

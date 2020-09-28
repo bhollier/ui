@@ -7,6 +7,7 @@ import (
 	"github.com/faiface/pixel/pixelgl"
 	"github.com/orfby/ui/pkg/ui/element"
 	"log"
+	"net/http"
 )
 
 //Type for an element that scrolls
@@ -26,8 +27,8 @@ type Scroll struct {
 }
 
 //Function to create a new import element
-func NewScroll(name xml.Name, parent element.Layout) element.Element {
-	return &Scroll{Impl: element.NewElement(name, parent)}
+func NewScroll(fs http.FileSystem, name xml.Name, parent element.Layout) element.Element {
+	return &Scroll{Impl: element.NewElement(fs, name, parent)}
 }
 
 //The XML name of the import element
@@ -56,7 +57,7 @@ func (e *Scroll) UnmarshalXML(d *xml.Decoder, start xml.StartElement) (err error
 	}
 
 	//Unmarshal the layout's children
-	e.LayoutImpl.Children, err = element.ChildrenUnmarshalXML(e, d, start)
+	e.LayoutImpl.Children, err = element.ChildrenUnmarshalXML(e.GetFS(), e, d, start)
 	if err != nil {
 		return err
 	}

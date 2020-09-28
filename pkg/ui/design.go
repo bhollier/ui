@@ -7,6 +7,7 @@ import (
 	_ "github.com/orfby/ui/pkg/ui/builtin"
 	"github.com/orfby/ui/pkg/ui/element"
 	"log"
+	"net/http"
 	"sync"
 	"time"
 )
@@ -14,6 +15,9 @@ import (
 //A UI design, built from an XML file
 type Design struct {
 	sync.Mutex
+
+	//The filesystem to use
+	fs http.FileSystem
 
 	//The design's window
 	window *pixelgl.Window
@@ -34,9 +38,11 @@ type Design struct {
 //Function to create a new design from
 //an XML string. This function must be
 //called within pixelgl.Run
-func NewDesign(path string, windowConfig pixelgl.WindowConfig) (d *Design, err error) {
+func NewDesign(fs http.FileSystem, path string, windowConfig pixelgl.WindowConfig) (d *Design, err error) {
 	//Create a new design struct
 	d = new(Design)
+	//The file system
+	d.fs = fs
 	//Create the condition variable
 	d.waitCondVar = sync.NewCond(d)
 	//The path
@@ -44,7 +50,7 @@ func NewDesign(path string, windowConfig pixelgl.WindowConfig) (d *Design, err e
 
 	//Create the root
 	log.Printf("Loading XML design from '" + path + "'...")
-	d.root, err = element.NewRoot(nil, path)
+	d.root, err = element.NewRoot(fs, nil, path)
 	if err != nil {
 		return nil, err
 	}
@@ -151,7 +157,7 @@ func (d *Design) pollEvents() {
 				d.window.JustPressed(pixelgl.KeyR) {
 				//Create a new root root
 				log.Printf("Loading XML design from '" + d.path + "'...")
-				newRoot, err := element.NewRoot(nil, d.path)
+				newRoot, err := element.NewRoot(d.fs, nil, d.path)
 				if err != nil {
 					log.Printf("Error reloading XML: %+v", err)
 				}

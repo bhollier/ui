@@ -4,6 +4,7 @@ import (
 	"encoding/xml"
 	"errors"
 	"github.com/faiface/pixel/pixelgl"
+	"net/http"
 )
 
 //Interface type for a layout element
@@ -60,7 +61,7 @@ func (e *LayoutImpl) Reset() {
 //a number of child elements. This function
 //is usually only called by
 //LayoutImpl.UnmarshalXML
-func ChildrenUnmarshalXML(parent Layout, d *xml.Decoder,
+func ChildrenUnmarshalXML(fs http.FileSystem, parent Layout, d *xml.Decoder,
 	start xml.StartElement) ([]Element, error) {
 	//Iterate over the XML tokens
 	children := make([]Element, 0)
@@ -75,7 +76,7 @@ func ChildrenUnmarshalXML(parent Layout, d *xml.Decoder,
 		//If this is the start of an element
 		case xml.StartElement:
 			//Create an element of the type
-			elem = New(tt.Name, parent)
+			elem = New(fs, tt.Name, parent)
 			//If the element was created
 			if elem != nil {
 				//Decode the XML element into it

@@ -7,6 +7,7 @@ import (
 	"github.com/orfby/ui/pkg/ui/element"
 	"github.com/orfby/ui/pkg/ui/util"
 	"math"
+	"net/http"
 )
 
 //Layout type for displaying elements as a
@@ -22,9 +23,9 @@ type LinearLayout struct {
 }
 
 //Function to create a new linear layout
-func NewLinearLayout(name xml.Name, parent element.Layout) element.Element {
+func NewLinearLayout(fs http.FileSystem, name xml.Name, parent element.Layout) element.Element {
 	return &LinearLayout{
-		Impl:        element.NewElement(name, parent),
+		Impl:        element.NewElement(fs, name, parent),
 		Orientation: util.DefaultOrientation,
 	}
 }
@@ -49,7 +50,7 @@ func (e *LinearLayout) UnmarshalXML(d *xml.Decoder, start xml.StartElement) (err
 	}
 
 	//Unmarshal the layout's children
-	e.LayoutImpl.Children, err = element.ChildrenUnmarshalXML(e, d, start)
+	e.LayoutImpl.Children, err = element.ChildrenUnmarshalXML(e.GetFS(), e, d, start)
 	if err != nil {
 		return err
 	}

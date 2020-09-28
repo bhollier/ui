@@ -62,7 +62,7 @@ func InitImage(e HasImage) error {
 	//If the image hasn't been made yet
 	if e.GetImageSprite() == nil {
 		//Load the image
-		picture, err := util.CreatePictureFromField(e.GetImageField())
+		picture, err := util.CreatePictureFromField(e.GetFS(), e.GetImageField())
 		if err != nil {
 			return err
 		}

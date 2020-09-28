@@ -6,14 +6,14 @@ import (
 	"image"
 	_ "image/jpeg"
 	_ "image/png"
-	"os"
+	"net/http"
 )
 
 //Function to load an image and
 //convert it to a pixel.Picture
-func LoadPicture(path string) (pixel.Picture, error) {
+func LoadPicture(fs http.FileSystem, path string) (pixel.Picture, error) {
 	//Open the file
-	file, err := os.Open(path)
+	file, err := fs.Open(path)
 	if err != nil {
 		return nil, err
 	}
@@ -30,7 +30,7 @@ func LoadPicture(path string) (pixel.Picture, error) {
 
 //Function to create a picture
 //from an XML string
-func CreatePictureFromField(field string) (pixel.Picture, error) {
+func CreatePictureFromField(fs http.FileSystem, field string) (pixel.Picture, error) {
 	if field != "" {
 		//If the first character is a hash
 		if field[0] == '#' {
@@ -52,7 +52,7 @@ func CreatePictureFromField(field string) (pixel.Picture, error) {
 			return pic, nil
 		} else {
 			//Load the picture
-			pic, err := LoadPicture(field)
+			pic, err := LoadPicture(fs, field)
 			if err != nil {
 				return nil, err
 			}

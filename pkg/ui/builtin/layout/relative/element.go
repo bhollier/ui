@@ -4,13 +4,17 @@ import (
 	"encoding/xml"
 	"errors"
 	"github.com/orfby/ui/pkg/ui/element"
+	"net/http"
 )
 
 //Wrapper type that stores an
 //element.Element and its relative fields
 type relativeElement struct {
-	//The parent element
-	parent element.Layout
+	//The parent layout
+	parent *Layout
+
+	//The filesystem to use
+	fs http.FileSystem
 
 	//The attribute for specifying which
 	//element this element goes on top of
@@ -33,12 +37,17 @@ type relativeElement struct {
 	element.Element `uixml:"hidden"`
 }
 
+//Function to create a relative element
+func newRelativeElement(fs http.FileSystem, parent *Layout) relativeElement {
+	return relativeElement{parent: parent, fs: fs}
+}
+
 //Function to unmarshal an XML element into
 //a relative element. This function is
 //only called by xml.Unmarshal
 func (e *relativeElement) UnmarshalXML(d *xml.Decoder, start xml.StartElement) (err error) {
 	//Create an element of the type
-	e.Element = element.New(start.Name, e.parent)
+	e.Element = element.New(e.fs, start.Name, e.parent)
 	//If the element wasn't created
 	if e.Element == nil {
 		return errors.New("unknown element type '" +

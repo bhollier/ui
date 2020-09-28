@@ -7,6 +7,7 @@ import (
 	"github.com/faiface/pixel/pixelgl"
 	"github.com/orfby/ui/pkg/ui/element"
 	"github.com/orfby/ui/pkg/ui/util"
+	"net/http"
 )
 
 //Type for an element that enforces a fixed ratio
@@ -22,8 +23,8 @@ type FixedRatio struct {
 }
 
 //Function to create a new fixed ratio element
-func NewFixedRatio(name xml.Name, parent element.Layout) element.Element {
-	return &FixedRatio{Impl: element.NewElement(name, parent)}
+func NewFixedRatio(fs http.FileSystem, name xml.Name, parent element.Layout) element.Element {
+	return &FixedRatio{Impl: element.NewElement(fs, name, parent)}
 }
 
 //The XML name of the import element
@@ -46,7 +47,7 @@ func (e *FixedRatio) UnmarshalXML(d *xml.Decoder, start xml.StartElement) (err e
 	}
 
 	//Unmarshal the layout's children
-	e.LayoutImpl.Children, err = element.ChildrenUnmarshalXML(e, d, start)
+	e.LayoutImpl.Children, err = element.ChildrenUnmarshalXML(e.GetFS(), e, d, start)
 	if err != nil {
 		return err
 	}

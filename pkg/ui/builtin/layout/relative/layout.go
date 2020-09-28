@@ -7,6 +7,7 @@ import (
 	"github.com/faiface/pixel/pixelgl"
 	"github.com/orfby/ui/pkg/ui/element"
 	"github.com/orfby/ui/pkg/ui/util"
+	"net/http"
 )
 
 //Layout type for displaying elements
@@ -22,8 +23,8 @@ type Layout struct {
 }
 
 //Function to create a new relative layout
-func NewLayout(name xml.Name, parent element.Layout) element.Element {
-	return &Layout{Impl: element.NewElement(name, parent)}
+func NewLayout(fs http.FileSystem, name xml.Name, parent element.Layout) element.Element {
+	return &Layout{Impl: element.NewElement(fs, name, parent)}
 }
 
 //The XML name of the element
@@ -90,7 +91,7 @@ Loop:
 		//If this is the start of an element
 		case xml.StartElement:
 			//Create a relative element
-			elem := relativeElement{parent: e}
+			elem := newRelativeElement(e.GetFS(), e)
 			//Decode the XML element into it
 			err = d.DecodeElement(&elem, &tt)
 			if err != nil {

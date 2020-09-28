@@ -6,6 +6,7 @@ import (
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
 	"github.com/orfby/ui/pkg/ui/element"
+	"net/http"
 )
 
 //Element type for an image
@@ -19,8 +20,8 @@ type Image struct {
 }
 
 //Function to create a new image
-func NewImage(name xml.Name, parent element.Layout) element.Element {
-	return &Image{Impl: element.NewElement(name, parent)}
+func NewImage(fs http.FileSystem, name xml.Name, parent element.Layout) element.Element {
+	return &Image{Impl: element.NewElement(fs, name, parent)}
 }
 
 //The XML name of the element

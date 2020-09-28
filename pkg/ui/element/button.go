@@ -6,6 +6,7 @@ import (
 	"github.com/faiface/pixel/pixelgl"
 	"github.com/orfby/ui/pkg/ui/util"
 	"log"
+	"net/http"
 )
 
 //A button's state
@@ -77,8 +78,8 @@ type ButtonImpl struct {
 }
 
 //Function to create a button element
-func NewButton(name xml.Name, parent Layout) ButtonImpl {
-	e := ButtonImpl{Impl: NewElement(name, parent)}
+func NewButton(fs http.FileSystem, name xml.Name, parent Layout) ButtonImpl {
+	e := ButtonImpl{Impl: NewElement(fs, name, parent)}
 	//Set the state as the default
 	e.state = ButtonDefaultState
 	//Create the backgrounds map
@@ -160,7 +161,7 @@ func (e *ButtonImpl) Init(window *pixelgl.Window, bounds *pixel.Rect) error {
 		//If the hovered background hasn't been made
 		if e.backgrounds[ButtonHoveredState] == nil {
 			//Load the background picture
-			picture, err := util.CreatePictureFromField(e.HoveredBackground)
+			picture, err := util.CreatePictureFromField(e.GetFS(), e.HoveredBackground)
 			if err != nil {
 				return err
 			}
@@ -174,7 +175,7 @@ func (e *ButtonImpl) Init(window *pixelgl.Window, bounds *pixel.Rect) error {
 		//If the pressed background hasn't been made
 		if e.backgrounds[ButtonPressedState] == nil {
 			//Load the background picture
-			picture, err := util.CreatePictureFromField(e.PressedBackground)
+			picture, err := util.CreatePictureFromField(e.GetFS(), e.PressedBackground)
 			if err != nil {
 				return err
 			}

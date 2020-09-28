@@ -4,6 +4,7 @@ import (
 	"github.com/faiface/pixel"
 	"github.com/orfby/ui/pkg/ui/util"
 	"image/color"
+	"net/http"
 )
 
 //Interface for a background
@@ -78,13 +79,13 @@ func (e *BkgImpl) IsInitialised() bool {
 //Should be called last (as the size of
 //the background depends on the actual
 //size of the element)
-func InitBkg(e Bkg, bounds *pixel.Rect) error {
+func InitBkg(e Bkg, fs http.FileSystem, bounds *pixel.Rect) error {
 	//If the bounds are known
 	if bounds != nil {
 		//If the sprite doesn't exist
 		if e.GetBkgSprite() == nil {
 			//Load the background
-			picture, err := util.CreatePictureFromField(e.GetBkgField())
+			picture, err := util.CreatePictureFromField(fs, e.GetBkgField())
 			if err != nil {
 				return err
 			}

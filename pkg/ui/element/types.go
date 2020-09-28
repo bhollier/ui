@@ -2,11 +2,12 @@ package element
 
 import (
 	"encoding/xml"
+	"net/http"
 	"reflect"
 )
 
 //Type for an element factory
-type Factory func(name xml.Name, parent Layout) Element
+type Factory func(fs http.FileSystem, name xml.Name, parent Layout) Element
 
 //Type for storing information
 //about an element type
@@ -102,12 +103,12 @@ func FullName(e Element, sep string, includeNamespace bool) (name string) {
 //name.Space in parent.GetNamespaces(),
 //then if still not found will search for
 //an element type with a matching name.Local
-func New(name xml.Name, parent Layout) Element {
+func New(fs http.FileSystem, name xml.Name, parent Layout) Element {
 	//Try to get the element type
 	elemType, ok := elementTypes[name]
 	//If it was found, call the type's factory
 	if ok {
-		return elemType.Factory(name, parent)
+		return elemType.Factory(fs, name, parent)
 		//If it wasn't found, but the namespace is empty
 	} else if name.Space == "" {
 		if parent != nil {
@@ -116,7 +117,7 @@ func New(name xml.Name, parent Layout) Element {
 				elemType, ok = elementTypes[xml.Name{
 					Local: name.Local, Space: ns}]
 				if ok {
-					return elemType.Factory(name, parent)
+					return elemType.Factory(fs, name, parent)
 				}
 			}
 		}
@@ -127,7 +128,7 @@ func New(name xml.Name, parent Layout) Element {
 			if elemTypeName.Local == name.Local {
 				//Assume that it's a match and call
 				//the type's factory
-				return elemType.Factory(name, parent)
+				return elemType.Factory(fs, name, parent)
 			}
 		}
 	}

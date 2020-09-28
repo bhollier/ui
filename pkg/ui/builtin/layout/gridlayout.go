@@ -7,6 +7,7 @@ import (
 	"github.com/orfby/ui/pkg/ui/element"
 	"github.com/orfby/ui/pkg/ui/util"
 	"math"
+	"net/http"
 )
 
 //Layout type for displaying elements in a
@@ -32,9 +33,9 @@ type GridLayout struct {
 }
 
 //Function to create a new grid layout
-func NewGridLayout(name xml.Name, parent element.Layout) element.Element {
+func NewGridLayout(fs http.FileSystem, name xml.Name, parent element.Layout) element.Element {
 	return &GridLayout{
-		Impl:        element.NewElement(name, parent),
+		Impl:        element.NewElement(fs, name, parent),
 		Orientation: util.DefaultOrientation,
 		Columns:     0,
 		CellWidth:   util.ZeroRelativeSize,
@@ -62,7 +63,7 @@ func (e *GridLayout) UnmarshalXML(d *xml.Decoder, start xml.StartElement) (err e
 	}
 
 	//Unmarshal the layout's children
-	e.LayoutImpl.Children, err = element.ChildrenUnmarshalXML(e, d, start)
+	e.LayoutImpl.Children, err = element.ChildrenUnmarshalXML(e.GetFS(), e, d, start)
 	if err != nil {
 		return err
 	}

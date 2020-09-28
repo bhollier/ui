@@ -5,6 +5,7 @@ import (
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
 	"github.com/orfby/ui/pkg/ui/util"
+	"net/http"
 )
 
 //Interface type for something
@@ -12,6 +13,10 @@ import (
 type Element interface {
 	//Function to get the element's parent
 	GetParent() Layout
+
+	//Function to get the filesystem to use
+	//for opening files
+	GetFS() http.FileSystem
 
 	//Function to get the element's XML name
 	GetName() xml.Name
@@ -120,6 +125,9 @@ type Impl struct {
 	//The element's parent
 	parent Layout
 
+	//The filesystem to use
+	fs http.FileSystem
+
 	//The element's XML name
 	name xml.Name
 	//The element's XML namespaces
@@ -161,10 +169,11 @@ type Impl struct {
 }
 
 //Function to create an element
-func NewElement(name xml.Name, parent Layout) Impl {
+func NewElement(fs http.FileSystem, name xml.Name, parent Layout) Impl {
 	e := Impl{
 		name:    name,
 		parent:  parent,
+		fs:      fs,
 		Gravity: util.DefaultGravity,
 		Padding: util.DefaultAbsoluteQuantity,
 	}
@@ -188,6 +197,10 @@ func NewElement(name xml.Name, parent Layout) Impl {
 
 //Function to get the element's parent
 func (e *Impl) GetParent() Layout { return e.parent }
+
+//Function to get the filesystem to use
+//for opening files
+func (e *Impl) GetFS() http.FileSystem { return e.fs }
 
 //Function to get the element's name
 func (e *Impl) GetName() xml.Name { return e.name }
@@ -510,7 +523,7 @@ func (e *Impl) Init(window *pixelgl.Window, bounds *pixel.Rect) error {
 	}
 
 	//Initialise the background
-	err := InitBkg(e, bounds)
+	err := InitBkg(e, e.GetFS(), bounds)
 	if err != nil {
 		return err
 	}
