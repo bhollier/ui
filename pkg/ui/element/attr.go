@@ -203,6 +203,14 @@ func init() {
 			}
 			return reflect.ValueOf(val), nil
 		},
+		//Parsing a "util.ScaleOption" type
+		reflect.TypeOf((*util.ScaleOption)(nil)).Elem(): func(attr string) (reflect.Value, error) {
+			val, err := util.ParseScaleOption(attr)
+			if err != nil {
+				return reflect.Value{}, err
+			}
+			return reflect.ValueOf(val), nil
+		},
 	}
 }
 

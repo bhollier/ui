@@ -1,6 +1,9 @@
 package util
 
-import "errors"
+import (
+	"errors"
+	"strings"
+)
 
 type GravSide int8
 
@@ -31,14 +34,14 @@ type Gravity struct {
 //The possible gravity types as a map
 var GravityTypes = map[string]Gravity{
 	"center":       {GravCenter, GravCenter},
-	"top":          {GravCenter, GravNeg   },
-	"bottom":       {GravCenter, GravPos   },
-	"left":         {GravNeg,    GravCenter},
-	"right":        {GravPos,    GravCenter},
-	"top-left":     {GravNeg,    GravNeg   },
-	"top-right":    {GravPos,    GravNeg   },
-	"bottom-left":  {GravNeg,    GravPos   },
-	"bottom-right": {GravPos,    GravPos   },
+	"top":          {GravCenter, GravNeg},
+	"bottom":       {GravCenter, GravPos},
+	"left":         {GravNeg, GravCenter},
+	"right":        {GravPos, GravCenter},
+	"top-left":     {GravNeg, GravNeg},
+	"top-right":    {GravPos, GravNeg},
+	"bottom-left":  {GravNeg, GravPos},
+	"bottom-right": {GravPos, GravPos},
 }
 
 //The default gravity
@@ -65,11 +68,17 @@ func (g *Gravity) String() string {
 //returns an error. If the value is an empty string,
 //the default gravity 'def' is used instead
 func ParseGravity(value string, def Gravity) (Gravity, error) {
+	//Convert the string to lowercase
+	value = strings.ToLower(value)
 	//If the value isn't given, use the default
-	if value == "" {return def, nil}
+	if value == "" {
+		return def, nil
+	}
 	//Try to get the gravity type from the map
 	gravity, ok := GravityTypes[value]
-	if ok {return gravity, nil} else {
+	if ok {
+		return gravity, nil
+	} else {
 		return Gravity{}, errors.New("invalid gravity '" + value + "'")
 	}
 }

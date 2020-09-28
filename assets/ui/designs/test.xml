@@ -4,14 +4,15 @@
         builtin:height="match_parent"
         builtin:gravity="right"
         builtin:columns="2"
-        builtin:background="./assets/ui/images/scalebkg-50px.png"
-        builtin:bkg-repeat="true">
+        builtin:background="images/scalebkg-50px.png"
+        builtin:bkg-scale="tiled">
     <Image
             builtin:width="100px"
             builtin:height="100px"
             builtin:gravity="center"
             builtin:background="#00000055"
-            builtin:source="./assets/ui/images/frog.png"/>
+            builtin:source="images/frog2.png"
+            builtin:scale="fill"/>
     <TextButton
             builtin:width="100px"
             builtin:height="50px"
@@ -29,6 +30,6 @@
             builtin:background="#FF0000"
             builtin:bkg-hovered="#FFFF00"
             builtin:bkg-pressed="#00FF00"
-            builtin:source="./assets/ui/images/frog.png"
+            builtin:source="images/frog.png"
             builtin:press-callback="testcallback"/>
 </GridLayout>

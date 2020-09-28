@@ -15,6 +15,9 @@ type HasImage interface {
 	//image XML field
 	GetImageField() string
 	//Function to get the element's
+	//image scale options
+	GetImageScale() util.ScaleOption
+	//Function to get the element's
 	//image sprite
 	GetImageSprite() *pixel.Sprite
 	//Function to set the element's
@@ -27,6 +30,9 @@ type ImageImpl struct {
 	//The element's image
 	//from xml
 	ImageField string `uixml:"http://github.com/orfby/ui/api/schema source,optional"`
+	//The element's scale
+	//option
+	ImageScale util.ScaleOption `uixml:"http://github.com/orfby/ui/api/schema scale,optional"`
 	//The element's image
 	//sprite
 	sprite *pixel.Sprite
@@ -35,6 +41,10 @@ type ImageImpl struct {
 //Function to get the background's
 //XML field
 func (e *ImageImpl) GetImageField() string { return e.ImageField }
+
+//Function to get the element's
+//image scale options
+func (e *ImageImpl) GetImageScale() util.ScaleOption { return e.ImageScale }
 
 //Function to get the background's
 //sprite
@@ -88,6 +98,8 @@ func InitImage(e HasImage) error {
 			newHeight := e.GetImageSprite().Frame().Size().Y
 			e.SetActualHeight(&newHeight)
 		}
+
+		//todo factor in scale options
 	}
 
 	return nil
@@ -96,17 +108,7 @@ func InitImage(e HasImage) error {
 //Function to draw an element's
 //image
 func DrawImage(e HasImage) {
-	if e.GetImageSprite() != nil {
-		mat := pixel.IM
-		//Scale the image so it fits in the canvas
-		mat = mat.ScaledXY(pixel.ZV, pixel.V(
-			e.GetCanvas().Bounds().Size().X/e.GetImageSprite().Frame().Size().X,
-			e.GetCanvas().Bounds().Size().Y/e.GetImageSprite().Frame().Size().Y))
-		//todo scale options
-		//Move it to the center of the canvas
-		mat = mat.Moved(e.GetCanvas().Bounds().Center())
-
-		//Draw the image
-		e.GetImageSprite().Draw(e.GetCanvas(), mat)
-	}
+	//Draw the image
+	util.DrawSprite(e.GetCanvas(), e.GetImageSprite(),
+		e.GetImageScale(), e.GetGravity())
 }
