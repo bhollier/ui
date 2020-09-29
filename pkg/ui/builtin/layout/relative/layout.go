@@ -32,7 +32,7 @@ var LayoutTypeName = xml.Name{Space: "http://github.com/orfby/ui/api/schema", Lo
 
 //Function to get one of a layout's
 //child elements
-func (e *Layout) GetChild(n int) element.Element { return &e.children[n] }
+func (e *Layout) GetChild(n int) element.Element { return e.children[n].Element }
 
 //Function to get the number element
 //elements a layout has

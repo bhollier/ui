@@ -364,16 +364,12 @@ func CalculateWidth(parent Element, window *pixelgl.Window,
 		//If the parent was found
 		if next != nil {
 			if relWidth.MatchParent {
-				//If the parent's bounds are known
-				if next.GetBounds() != nil {
-					newWidth := next.GetBounds().Size().X
-					width = &newWidth
-				} else {
-					width = nil
-				}
-			} else if next.GetBounds() != nil &&
+				//Set the size as the parent's
+				width = next.GetActualWidth()
+
+			} else if next.GetActualWidth() != nil &&
 				relWidth.Unit == util.Percent {
-				newWidth := next.GetBounds().Size().X * (float64(relWidth.Quantity) / 100)
+				newWidth := *next.GetActualWidth() * (float64(relWidth.Quantity) / 100)
 				width = &newWidth
 			}
 		} else {
@@ -409,9 +405,6 @@ func CalculateHeight(parent Element, window *pixelgl.Window,
 		//If the height depends on the parent
 	} else if relHeight.MatchParent ||
 		relHeight.Unit == util.Percent {
-		//todo  match_parent should fill the parent,
-		//todo  not match its width
-
 		//Go up the hierarchy until a parent
 		//is found that doesn't depend on it's
 		//child's height
@@ -423,16 +416,12 @@ func CalculateHeight(parent Element, window *pixelgl.Window,
 		//If the parent was found
 		if next != nil {
 			if relHeight.MatchParent {
-				//If the parent's bounds are known
-				if next.GetBounds() != nil {
-					newHeight := next.GetBounds().Size().Y
-					height = &newHeight
-				} else {
-					height = nil
-				}
-			} else if next.GetBounds() != nil &&
+				//Set the size as the parent's
+				height = next.GetActualHeight()
+
+			} else if next.GetActualHeight() != nil &&
 				relHeight.Unit == util.Percent {
-				newHeight := next.GetBounds().Size().Y * (float64(relHeight.Quantity) / 100)
+				newHeight := *next.GetActualHeight() * (float64(relHeight.Quantity) / 100)
 				height = &newHeight
 			}
 		} else {

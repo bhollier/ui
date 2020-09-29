@@ -56,7 +56,7 @@ func (e *relativeElement) UnmarshalXML(d *xml.Decoder, start xml.StartElement) (
 
 	//Create an array of the relative
 	//attributes
-	relativetAttrs := make([]xml.Attr, 0)
+	relativeAttrs := make([]xml.Attr, 0)
 
 	//The names of the relative attributes
 	topOfName := xml.Name{Space: "http://github.com/orfby/ui/api/schema", Local: "top-of"}
@@ -71,12 +71,12 @@ func (e *relativeElement) UnmarshalXML(d *xml.Decoder, start xml.StartElement) (
 			element.XMLNameMatch(attr.Name, leftOfName) ||
 			element.XMLNameMatch(attr.Name, rightOfName) {
 			//Add it to the attributes array
-			relativetAttrs = append(relativetAttrs, attr)
+			relativeAttrs = append(relativeAttrs, attr)
 		}
 	}
 
 	//Set the relative attributes
-	err = element.SetAttrs(e, relativetAttrs)
+	err = element.SetAttrs(e, relativeAttrs)
 	if err != nil {
 		return err
 	}

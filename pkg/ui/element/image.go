@@ -83,23 +83,76 @@ func InitImage(e HasImage) error {
 
 	//If the sprite has been created
 	if e.GetImageSprite() != nil {
+		scale := e.GetImageScale()
+		if scale == util.ZeroScaleOption {
+			scale = util.DefaultScaleOption
+		}
+
 		//If the element's width isn't known
 		//and the width should be the content
 		if e.GetActualWidth() == nil && e.GetRelWidth().MatchContent {
-			//Set the actual width as the size of the image
-			newWidth := e.GetImageSprite().Frame().Size().X
-			e.SetActualWidth(&newWidth)
+			switch scale {
+			case util.ScaleToFill:
+				fallthrough
+			case util.ScaleToFit:
+				fallthrough
+			case util.Stretch:
+				//If the height is knowable
+				if !e.GetRelHeight().MatchContent {
+					//If the height is known
+					if e.GetActualHeight() != nil {
+						//Calculate the scale factor of the height
+						scale := *e.GetActualHeight() / e.GetImageSprite().Frame().Size().Y
+						//Set the width as the image's
+						//width multiplied by the scale factor
+						newWidth := e.GetImageSprite().Frame().Size().X * scale
+						e.SetActualWidth(&newWidth)
+					}
+				} else {
+					//If it isn't knowable, just set the
+					//width as the width of the image
+					newWidth := e.GetImageSprite().Frame().Size().X
+					e.SetActualWidth(&newWidth)
+				}
+			default:
+				//Set the actual width as the size of the image
+				newWidth := e.GetImageSprite().Frame().Size().X
+				e.SetActualWidth(&newWidth)
+			}
 		}
 
 		//If the element's height isn't known
 		//and the height should be the content
 		if e.GetActualHeight() == nil && e.GetRelHeight().MatchContent {
-			//Set the actual height as the size of the image
-			newHeight := e.GetImageSprite().Frame().Size().Y
-			e.SetActualHeight(&newHeight)
+			switch scale {
+			case util.ScaleToFill:
+				fallthrough
+			case util.ScaleToFit:
+				fallthrough
+			case util.Stretch:
+				//If the width is knowable
+				if !e.GetRelWidth().MatchContent {
+					//If the width is known
+					if e.GetActualWidth() != nil {
+						//Calculate the scale factor of the width
+						scale := *e.GetActualWidth() / e.GetImageSprite().Frame().Size().X
+						//Set the height as the image's
+						//height multiplied by the scale factor
+						newHeight := e.GetImageSprite().Frame().Size().Y * scale
+						e.SetActualHeight(&newHeight)
+					}
+				} else {
+					//If it isn't knowable, just set the
+					//height as the height of the image
+					newHeight := e.GetImageSprite().Frame().Size().Y
+					e.SetActualWidth(&newHeight)
+				}
+			default:
+				//Set the actual height as the size of the image
+				newHeight := e.GetImageSprite().Frame().Size().Y
+				e.SetActualWidth(&newHeight)
+			}
 		}
-
-		//todo factor in scale options
 	}
 
 	return nil

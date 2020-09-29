@@ -6,6 +6,7 @@ import (
 	"github.com/faiface/pixel/pixelgl"
 	_ "github.com/orfby/ui/pkg/ui/builtin"
 	"github.com/orfby/ui/pkg/ui/element"
+	"github.com/xlab/treeprint"
 	"log"
 	"net/http"
 	"sync"
@@ -94,46 +95,36 @@ func (d *Design) update(root *element.Root) error {
 	//If the root still isn't initialised (because the
 	//loop limit was reached) return an error
 	if !root.IsInitialised() {
-		//Make an array of uninitialised elements
-		uninitialisedElements := make([]element.Element, 0)
+		//Make a tree of uninitialised elements
+		tree := treeprint.New()
 
 		//Recursive function to find uninitialised elements
-		var getUninitialisedElements func(element.Element)
-		getUninitialisedElements = func(e element.Element) {
+		var getUninitialisedElements func(treeprint.Tree, element.Element)
+		getUninitialisedElements = func(branch treeprint.Tree, e element.Element) {
 			//If the element isn't initialised
 			if !e.IsInitialised() {
-				//Add it to the array
-				uninitialisedElements = append(uninitialisedElements, e)
-
+				elemName := element.Name(e, true)
 				//Try to convert to a layout
 				layout, ok := e.(element.Layout)
 				//If it is a layout, iterate over the children
 				if ok {
+					newBranch := branch.AddBranch(elemName)
 					for i := 0; i < layout.NumChildren(); i++ {
 						//Get the child element's uninitialised elements
-						getUninitialisedElements(layout.GetChild(i))
+						getUninitialisedElements(newBranch, layout.GetChild(i))
 					}
+				} else {
+					branch.AddNode(elemName)
 				}
 			}
 		}
 
 		//Call the function on root
-		getUninitialisedElements(root.Element)
-		//Create a string
-		uninitialisedElementsStr := ""
-		for i, elem := range uninitialisedElements {
-			//Add the element to the string
-			uninitialisedElementsStr +=
-				element.FullName(elem, ".", true)
-			//Add a comma unless this is the last element
-			if i < len(uninitialisedElements)-1 {
-				uninitialisedElementsStr += ", "
-			}
-		}
+		getUninitialisedElements(tree, root.Element)
 
 		//Return an error with the uninitialised elements
 		return errors.New("infinite loop in element init detected. " +
-			"The following element(s) are still uninitialised: " + uninitialisedElementsStr)
+			"The following element(s) are still uninitialised: \n" + tree.String())
 	}
 
 	//Draw the design
