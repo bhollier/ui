@@ -2,9 +2,11 @@ package element
 
 import (
 	"encoding/xml"
+	"errors"
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
 	"github.com/orfby/ui/pkg/ui/util"
+	"github.com/xlab/treeprint"
 	"net/http"
 )
 
@@ -542,6 +544,65 @@ func DrawCanvasOntoParent(child *pixelgl.Canvas, parent *pixelgl.Canvas) {
 	mat = mat.Moved(child.Bounds().Center())
 	//Draw the child canvas onto the parent
 	child.Draw(parent, mat)
+}
+
+//Function to reset and initialise the
+//entire UI element tree, by traversing
+//up the given element's parents
+func InitUI(e Element, window *pixelgl.Window, bounds *pixel.Rect) error {
+	//While the element has a parent, go up the tree
+	for e.GetParent() != nil {
+		e = e.GetParent()
+	}
+
+	//Reset the element (and its children)
+	e.Reset()
+
+	//Keep initialising the element until it's all done
+	//or until the element has been initialised for the 1000th time
+	for i := 0; i < 1000 && !e.IsInitialised(); i++ {
+		//Initialise the element (and therefore all its children)
+		err := e.Init(window, bounds)
+		if err != nil {
+			return err
+		}
+	}
+
+	//If the element still isn't initialised (because the
+	//loop limit was reached) return an error
+	if !e.IsInitialised() {
+		//Make a tree of uninitialised elements
+		tree := treeprint.New()
+
+		//Recursive function to find uninitialised elements
+		var getUninitialisedElements func(treeprint.Tree, Element)
+		getUninitialisedElements = func(branch treeprint.Tree, e Element) {
+			//If the element isn't initialised
+			if !e.IsInitialised() {
+				elemName := Name(e, true)
+				//Try to convert to a layout
+				layout, ok := e.(Layout)
+				//If it is a layout, iterate over the children
+				if ok {
+					newBranch := branch.AddBranch(elemName)
+					for i := 0; i < layout.NumChildren(); i++ {
+						//Get the child element's uninitialised elements
+						getUninitialisedElements(newBranch, layout.GetChild(i))
+					}
+				} else {
+					branch.AddNode(elemName)
+				}
+			}
+		}
+
+		//Call the function on root
+		getUninitialisedElements(tree, e)
+
+		//Return an error with the uninitialised elements
+		return errors.New("infinite loop in element init detected. " +
+			"The following element(s) are still uninitialised: \n" + tree.String())
+	}
+	return nil
 }
 
 //Function to draw the entire UI element

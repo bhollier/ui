@@ -1,12 +1,10 @@
 package ui
 
 import (
-	"errors"
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
 	_ "github.com/orfby/ui/pkg/ui/builtin"
 	"github.com/orfby/ui/pkg/ui/element"
-	"github.com/xlab/treeprint"
 	"log"
 	"net/http"
 	"sync"
@@ -37,8 +35,7 @@ type Design struct {
 }
 
 //Function to create a new design from
-//an XML string. This function must be
-//called within pixelgl.Run
+//an XML string
 func NewDesign(fs http.FileSystem, path string, windowConfig pixelgl.WindowConfig) (d *Design, err error) {
 	//Create a new design struct
 	d = new(Design)
@@ -50,81 +47,58 @@ func NewDesign(fs http.FileSystem, path string, windowConfig pixelgl.WindowConfi
 	d.path = path
 
 	//Create the root
-	log.Printf("Loading XML design from '" + path + "'...")
 	d.root, err = element.NewRoot(fs, nil, path)
 	if err != nil {
 		return nil, err
 	}
 
 	//Create the window
-	log.Print("Creating pixelgl.Window...")
 	d.window, err = pixelgl.NewWindow(windowConfig)
 	if err != nil {
 		return nil, err
 	}
 
-	//Do an initial design update
-	log.Printf("Initialising design...")
-	err = d.update(d.root)
-
-	//Start the routine to poll events
-	log.Printf("Starting window event routine")
-	go d.pollEvents()
-
 	return
 }
+
+//Function to initialise (and draw) the
+//design. This function must be called
+//within pixelgl.Run
+func (d *Design) Init() (err error) {
+	//Update the root node
+	return d.update(d.root)
+}
+
+//Function to start the design
+func (d *Design) Start() { go d.pollEvents() }
+
+//Function to wait for the design to close
+func (d *Design) Wait() {
+	d.Lock()
+	//If the window is already closed
+	if d.window.Closed() {
+		return
+	}
+	//Wait for the design to close
+	d.waitCondVar.Wait()
+}
+
+//Function to start the design then wait
+//for it to finish
+func (d *Design) StartThenWait() { d.Start(); d.Wait() }
+
+//Function to get the design's window
+func (d *Design) GetWindow() *pixelgl.Window { return d.window }
 
 //Function to update the design
 func (d *Design) update(root *element.Root) error {
 	//Update the window's bounds
 	d.prevWindowBounds = d.window.Bounds()
 
-	//Reset the design (from the root)
-	root.Reset()
-
-	//Keep initialising the elements into they're all done
-	//or until the root node has been initialised for the 1000th time
-	for i := 0; i < 1000 && !root.IsInitialised(); i++ {
-		//Initialise the root element (and therefore all its children)
-		err := root.Init(d.window, &d.prevWindowBounds)
-		if err != nil {
-			return err
-		}
-	}
-
-	//If the root still isn't initialised (because the
-	//loop limit was reached) return an error
-	if !root.IsInitialised() {
-		//Make a tree of uninitialised elements
-		tree := treeprint.New()
-
-		//Recursive function to find uninitialised elements
-		var getUninitialisedElements func(treeprint.Tree, element.Element)
-		getUninitialisedElements = func(branch treeprint.Tree, e element.Element) {
-			//If the element isn't initialised
-			if !e.IsInitialised() {
-				elemName := element.Name(e, true)
-				//Try to convert to a layout
-				layout, ok := e.(element.Layout)
-				//If it is a layout, iterate over the children
-				if ok {
-					newBranch := branch.AddBranch(elemName)
-					for i := 0; i < layout.NumChildren(); i++ {
-						//Get the child element's uninitialised elements
-						getUninitialisedElements(newBranch, layout.GetChild(i))
-					}
-				} else {
-					branch.AddNode(elemName)
-				}
-			}
-		}
-
-		//Call the function on root
-		getUninitialisedElements(tree, root.Element)
-
-		//Return an error with the uninitialised elements
-		return errors.New("infinite loop in element init detected. " +
-			"The following element(s) are still uninitialised: \n" + tree.String())
+	//Initialise the design
+	err := element.InitUI(root.Element, d.window, &d.prevWindowBounds)
+	if err != nil {
+		return err
 	}
 
 	//Draw the design
@@ -154,28 +128,36 @@ func (d *Design) pollEvents() {
 				}
 
 				//Do an initial design update
-				log.Printf("Initialising design...")
 				err = d.update(newRoot)
+				if err != nil {
+					log.Fatal(err)
+				}
 
 				//Set the new root
-				d.root.Element = newRoot.Element
+				d.Lock()
+				d.root = newRoot
+				d.Unlock()
 
 				//If the window bounds changed
 			} else if d.prevWindowBounds != d.window.Bounds() {
 				//Update the design
+				d.Lock()
 				err := d.update(d.root)
+				d.Unlock()
 				if err != nil {
-					log.Fatalf("Fatal error: %+v", err)
+					log.Fatal(err)
 				}
 			}
 
 			//Tell the root element
 			//there was a new event
+			d.Lock()
 			/*go */
 			d.root.NewEvent(d.window)
 
 			//Draw the design
 			element.DrawUI(d.root.Element, d.window)
+			d.Unlock()
 		}
 
 		//Wait a bit before the next event
@@ -185,19 +167,4 @@ func (d *Design) pollEvents() {
 	//Broadcast to any threads
 	//waiting for the design to close
 	d.waitCondVar.Broadcast()
-}
-
-//Function to get the design's window
-func (d *Design) GetWindow() *pixelgl.Window { return d.window }
-
-//Function to wait for the design to close
-func (d *Design) Wait() error {
-	d.Lock()
-	//If the window is already closed
-	if d.window.Closed() {
-		return nil
-	}
-	//Wait for the design to close
-	d.waitCondVar.Wait()
-	return nil
 }

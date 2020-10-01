@@ -22,9 +22,9 @@ func main() {
 
 	//Check the flags
 	if len(flag.Args()) == 0 {
-		log.Fatalf("Error: no path given")
+		log.Fatal("Error: no path given")
 	} else if len(flag.Args()) > 1 {
-		log.Fatalf("Error: multiple paths given")
+		log.Fatal("Error: multiple paths given")
 	}
 
 	//Get the path
@@ -33,8 +33,12 @@ func main() {
 	//Open the ui assets folder
 	uiDir := http.Dir("./assets/ui")
 
+	var design *ui.Design
+
 	//Run the design stuff on the pixelgl thread
 	pixelgl.Run(func() {
+		var err error
+
 		//If the CPU profile was given
 		if *cpuProfile != "" {
 			//Create the file
@@ -52,19 +56,22 @@ func main() {
 		}
 
 		//Create a new design
-		design, err := ui.NewDesign(uiDir, path,
+		design, err = ui.NewDesign(uiDir, path,
 			pixelgl.WindowConfig{
 				Bounds: pixel.R(0, 0, *width, *height),
 				Title:  path,
 			})
 		if err != nil {
-			log.Fatalf("Fatal error: %+v", err)
+			log.Fatal(err)
 		}
 
-		//Wait for it to finish
-		err = design.Wait()
+		//Initialise the design
+		err = design.Init()
 		if err != nil {
-			log.Fatalf("Fatal error: %+v", err)
+			log.Fatal(err)
 		}
 	})
+
+	//Start then wait for it to finish
+	design.StartThenWait()
 }
