@@ -5,17 +5,19 @@ import (
 	"reflect"
 )
 
-//Function to register the relative types
+// Function to register the relative types
 func init() {
-	//Register the relative attribute types
+	// Register the relative attribute types
 	element.RegisterAttrType(
 		reflect.TypeOf((*relativePosition)(nil)).Elem(), func(attr string) (reflect.Value, error) {
 			val, err := parseRelativePosition(attr)
-			if err != nil {return reflect.Value{}, err}
+			if err != nil {
+				return reflect.Value{}, err
+			}
 			return reflect.ValueOf(val), nil
 		})
 
-	//Register the relative element types
+	// Register the relative element types
 	element.Register(LayoutTypeName,
 		reflect.TypeOf((*Layout)(nil)).Elem(), NewLayout)
 }

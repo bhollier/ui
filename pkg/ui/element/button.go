@@ -9,80 +9,80 @@ import (
 	"net/http"
 )
 
-//A button's state
+// A button's state
 type ButtonState string
 
-//The default button state
+// The default button state
 const ButtonDefaultState = "default"
 
-//The button state when the mouse is over it
+// The button state when the mouse is over it
 const ButtonHoveredState = "hovered"
 
-//The button state for when the
-//mouse is pressing the button
+// The button state for when the
+// mouse is pressing the button
 const ButtonPressedState = "pressed"
 
-//Interface for a button element
+// Interface for a button element
 type Button interface {
-	//A button is an element
+	// A button is an element
 	Element
 
-	//Function to get the button's
-	//current state
+	// Function to get the button's
+	// current state
 	GetButtonState() ButtonState
-	//Function to set the button's
-	//current state
+	// Function to set the button's
+	// current state
 	SetButtonState(s ButtonState)
 
-	//Function to get the button's
-	//background field from XML for
-	//the given state
+	// Function to get the button's
+	// background field from XML for
+	// the given state
 	GetButtonBkgField(s ButtonState) string
 
-	//Function to get the button's
-	//background sprite for the given
-	//state
+	// Function to get the button's
+	// background sprite for the given
+	// state
 	GetButtonBkg(s ButtonState) *pixel.Sprite
-	//Function to set the button's
-	//background sprite for the given
-	//state
+	// Function to set the button's
+	// background sprite for the given
+	// state
 	SetButtonBkg(state ButtonState, sprite *pixel.Sprite)
 
-	//Function to call the press callback
+	// Function to call the press callback
 	CallPressCallback() error
 }
 
-//Type for a button. Note, structs
-//must either include ButtonImpl or
-//Impl, not both
+// Type for a button. Note, structs
+// must either include ButtonImpl or
+// Impl, not both
 type ButtonImpl struct {
-	//The button is an element
+	// The button is an element
 	Impl
 
-	//The button's current state
+	// The button's current state
 	state ButtonState
 
-	//The button's background when
-	//being hovered over from XML
+	// The button's background when
+	// being hovered over from XML
 	HoveredBackground string `uixml:"http://github.com/orfby/ui/api/schema bkg-hovered,optional"`
-	//The button's background when
-	//being pressed from XML
+	// The button's background when
+	// being pressed from XML
 	PressedBackground string `uixml:"http://github.com/orfby/ui/api/schema bkg-pressed,optional"`
 
-	//The button's background
-	//sprites for each state
+	// The button's background
+	// sprites for each state
 	backgrounds map[ButtonState]*pixel.Sprite
 
-	//The element's press callback
+	// The element's press callback
 	PressCallback string `uixml:"http://github.com/orfby/ui/api/schema press-callback,optional"`
 }
 
-//Function to create a button element
+// Function to create a button element
 func NewButton(fs http.FileSystem, name xml.Name, parent Layout) ButtonImpl {
 	e := ButtonImpl{Impl: NewElement(fs, name, parent)}
-	//Set the state as the default
+	// Set the state as the default
 	e.state = ButtonDefaultState
-	//Create the backgrounds map
+	// Create the backgrounds map
 	e.backgrounds = map[ButtonState]*pixel.Sprite{
 		ButtonDefaultState: nil,
 		ButtonHoveredState: nil,
@@ -91,21 +91,21 @@ func NewButton(fs http.FileSystem, name xml.Name, parent Layout) ButtonImpl {
 	return e
 }
 
-//Function to get the button's
-//current state
+// Function to get the button's
+// current state
 func (e *ButtonImpl) GetButtonState() ButtonState { return e.state }
 
-//Function to set the button's
-//current state
+// Function to set the button's
+// current state
 func (e *ButtonImpl) SetButtonState(s ButtonState) {
 	e.state = s
-	//Update the background
+	// Update the background
 	e.GetBkg().SetSprite(e.backgrounds[e.state])
 }
 
-//Function to get the button's
-//background field from XML for
-//the given state
+// Function to get the button's
+// background field from XML for
+// the given state
 func (e *ButtonImpl) GetButtonBkgField(s ButtonState) string {
 	if s == ButtonDefaultState {
 		return e.GetBkg().GetField()
@@ -116,19 +116,19 @@ func (e *ButtonImpl) GetButtonBkgField(s ButtonState) string {
 	}
 }
 
-//Function to get the button's
-//background sprite for the given
-//state
+// Function to get the button's
+// background sprite for the given
+// state
 func (e *ButtonImpl) GetButtonBkg(s ButtonState) *pixel.Sprite { return e.backgrounds[s] }
 
-//Function to set the button's
-//background sprite for the given
-//state
+// Function to set the button's
+// background sprite for the given
+// state
 func (e *ButtonImpl) SetButtonBkg(state ButtonState, sprite *pixel.Sprite) {
 	e.backgrounds[state] = sprite
 }
 
-//Function to call the press callback
+// Function to call the press callback
 func (e *ButtonImpl) CallPressCallback() error {
 	if e.PressCallback != "" {
 		return Call(e.PressCallback, e)
@@ -136,45 +136,45 @@ func (e *ButtonImpl) CallPressCallback() error {
 	return nil
 }
 
-//Function to determine whether
-//the element is initialised
+// Function to determine whether
+// the element is initialised
 func (e *ButtonImpl) IsInitialised() bool {
 	return e.Impl.IsInitialised() &&
 		(e.HoveredBackground == "" || e.backgrounds[ButtonHoveredState] != nil) &&
 		(e.PressedBackground == "" || e.backgrounds[ButtonPressedState] != nil)
 }
 
-//Function to initialise the element
+// Function to initialise the element
 func (e *ButtonImpl) Init(window *pixelgl.Window, bounds *pixel.Rect) error {
-	//Initialise the element
+	// Initialise the element
 	err := e.Impl.Init(window, bounds)
 	if err != nil {
 		return err
 	}
 
-	//If the bounds are known
+	// If the bounds are known
 	if bounds != nil {
-		//If the default background hasn't been set
+		// If the default background hasn't been set
 		if e.backgrounds[ButtonDefaultState] == nil {
 			e.backgrounds[ButtonDefaultState] = e.Impl.GetBkg().GetSprite()
 		}
-		//If the hovered background hasn't been made
+		// If the hovered background hasn't been made
 		if e.backgrounds[ButtonHoveredState] == nil {
-			//Load the background picture
+			// Load the background picture
 			picture, err := util.CreatePictureFromField(e.GetFS(), e.HoveredBackground)
 			if err != nil {
 				return err
 			}
 			if picture != nil {
-				//Create a sprite
+				// Create a sprite
 				e.backgrounds[ButtonHoveredState] = pixel.NewSprite(picture, picture.Bounds())
 			} else {
 				e.backgrounds[ButtonHoveredState] = e.backgrounds[ButtonDefaultState]
 			}
 		}
-		//If the pressed background hasn't been made
+		// If the pressed background hasn't been made
 		if e.backgrounds[ButtonPressedState] == nil {
-			//Load the background picture
+			// Load the background picture
 			picture, err := util.CreatePictureFromField(e.GetFS(), e.PressedBackground)
 			if err != nil {
 				return err
@@ -189,24 +189,24 @@ func (e *ButtonImpl) Init(window *pixelgl.Window, bounds *pixel.Rect) error {
 	return nil
 }
 
-//Function to handle a button's new event
+// Function to handle a button's new event
 func ButtonNewEvent(e Button, window *pixelgl.Window) {
-	//Whether the button's state changed
+	// Whether the button's state changed
 	stateChange := false
-	//If the mouse is actually in the window
+	// If the mouse is actually in the window
 	if window.MouseInsideWindow() &&
 		e.GetCanvas().Bounds().Contains(window.MousePosition()) {
-		//If the mouse button is being pressed
+		// If the mouse button is being pressed
 		if window.Pressed(pixelgl.MouseButtonLeft) {
 			stateChange = e.GetButtonState() != ButtonPressedState
 			e.SetButtonState(ButtonPressedState)
 
-			//If the state changed
+			// If the state changed
 			if stateChange {
-				//Call the press callback
+				// Call the press callback
 				err := e.CallPressCallback()
 				if err != nil {
-					//could be better
+					// could be better
 					log.Printf("Error from button callback: %+v", err)
 				}
 			}
@@ -219,9 +219,9 @@ func ButtonNewEvent(e Button, window *pixelgl.Window) {
 		e.SetButtonState(ButtonDefaultState)
 	}
 
-	//If the state was changed
+	// If the state was changed
 	if stateChange {
-		//Redraw the whole UI
+		// Redraw the whole UI
 		DrawUI(e, window)
 	}
 }

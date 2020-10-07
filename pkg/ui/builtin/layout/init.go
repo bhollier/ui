@@ -6,9 +6,9 @@ import (
 	"reflect"
 )
 
-//Function to register the layout types
+// Function to register the layout types
 func init() {
-	//Register the layout types
+	// Register the layout types
 	element.Register(GridLayoutTypeName,
 		reflect.TypeOf((*GridLayout)(nil)).Elem(), NewGridLayout)
 	element.Register(LinearLayoutTypeName,

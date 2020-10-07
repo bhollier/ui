@@ -5,9 +5,9 @@ import (
 	"reflect"
 )
 
-//Function to register the button types
+// Function to register the button types
 func init() {
-	//Register the button types
+	// Register the button types
 	element.Register(ImageButtonTypeName,
 		reflect.TypeOf((*ImageButton)(nil)).Elem(), NewImageButton)
 	element.Register(TextButtonTypeName,

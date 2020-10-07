@@ -9,42 +9,42 @@ import (
 	"net/http"
 )
 
-//Element type for a text button
+// Element type for a text button
 type TextButton struct {
-	//A text button is a button
+	// A text button is a button
 	element.ButtonImpl
 
-	//It has text
+	// It has text
 	element.TextImpl
 }
 
-//Function to create a new text button
+// Function to create a new text button
 func NewTextButton(fs http.FileSystem, name xml.Name, parent element.Layout) element.Element {
 	return &TextButton{ButtonImpl: element.NewButton(fs, name, parent)}
 }
 
-//The XML name of the element
+// The XML name of the element
 var TextButtonTypeName = xml.Name{Space: "http://github.com/orfby/ui/api/schema", Local: "TextButton"}
 
-//Function to unmarshal an XML element into
-//an element. This function is usually only
-//called by xml.Unmarshal
+// Function to unmarshal an XML element into
+// an element. This function is usually only
+// called by xml.Unmarshal
 func (e *TextButton) UnmarshalXML(d *xml.Decoder, start xml.StartElement) (err error) {
-	//Unmarshal the button
+	// Unmarshal the button
 	err = e.ButtonImpl.UnmarshalXML(d, start)
 	if err != nil {
 		return err
 	}
 
-	//Set the element's attributes
+	// Set the element's attributes
 	err = element.SetAttrs(e, start.Attr)
 	if err != nil {
 		return err
 	}
 
-	//If no text was given
+	// If no text was given
 	if e.TextImpl.GetField() == "" {
-		//If it wants to match the content
+		// If it wants to match the content
 		if e.GetRelWidth().MatchContent {
 			return errors.New("invalid width attribute value 'match_content' on XML element '" +
 				element.FullName(e, ".", false) +
@@ -59,28 +59,28 @@ func (e *TextButton) UnmarshalXML(d *xml.Decoder, start xml.StartElement) (err e
 	return d.Skip()
 }
 
-//Function to reset the element
+// Function to reset the element
 func (e *TextButton) Reset() {
 	e.ButtonImpl.Reset()
 	e.TextImpl.Reset()
 }
 
-//Function to determine whether
-//the element is initialised
+// Function to determine whether
+// the element is initialised
 func (e *TextButton) IsInitialised() bool {
 	return e.ButtonImpl.IsInitialised() &&
 		e.TextImpl.IsInitialised()
 }
 
-//Function to initialise the element
+// Function to initialise the element
 func (e *TextButton) Init(window *pixelgl.Window, bounds *pixel.Rect) error {
-	//Initialise the button
+	// Initialise the button
 	err := e.ButtonImpl.Init(window, bounds)
 	if err != nil {
 		return err
 	}
 
-	//Initialise the button's text
+	// Initialise the button's text
 	err = element.InitText(e, &e.TextImpl, bounds)
 	if err != nil {
 		return err
@@ -88,17 +88,17 @@ func (e *TextButton) Init(window *pixelgl.Window, bounds *pixel.Rect) error {
 	return nil
 }
 
-//Function that is called when there
-//is a new event
+// Function that is called when there
+// is a new event
 func (e *TextButton) NewEvent(window *pixelgl.Window) {
-	//Call the button's new event
+	// Call the button's new event
 	element.ButtonNewEvent(e, window)
 }
 
-//Function to draw the element
+// Function to draw the element
 func (e *TextButton) Draw() {
-	//Draw the button
+	// Draw the button
 	e.ButtonImpl.Draw()
-	//Draw the text
+	// Draw the text
 	element.DrawText(e, &e.TextImpl)
 }
