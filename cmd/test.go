@@ -70,8 +70,8 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-	})
 
-	//Start then wait for it to finish
-	design.StartThenWait()
+		//Start then wait for it to finish
+		design.StartThenWait()
+	})
 }

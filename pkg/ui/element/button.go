@@ -23,16 +23,16 @@ const ButtonHoveredState = "hovered"
 const ButtonPressedState = "pressed"
 
 //Interface for a button element
-type HasButton interface {
+type Button interface {
 	//A button is an element
 	Element
 
 	//Function to get the button's
 	//current state
-	GetState() ButtonState
+	GetButtonState() ButtonState
 	//Function to set the button's
 	//current state
-	SetState(s ButtonState)
+	SetButtonState(s ButtonState)
 
 	//Function to get the button's
 	//background field from XML for
@@ -93,14 +93,14 @@ func NewButton(fs http.FileSystem, name xml.Name, parent Layout) ButtonImpl {
 
 //Function to get the button's
 //current state
-func (e *ButtonImpl) GetState() ButtonState { return e.state }
+func (e *ButtonImpl) GetButtonState() ButtonState { return e.state }
 
 //Function to set the button's
 //current state
-func (e *ButtonImpl) SetState(s ButtonState) {
+func (e *ButtonImpl) SetButtonState(s ButtonState) {
 	e.state = s
 	//Update the background
-	e.SetBkgSprite(e.backgrounds[e.state])
+	e.GetBkg().SetSprite(e.backgrounds[e.state])
 }
 
 //Function to get the button's
@@ -108,7 +108,7 @@ func (e *ButtonImpl) SetState(s ButtonState) {
 //the given state
 func (e *ButtonImpl) GetButtonBkgField(s ButtonState) string {
 	if s == ButtonDefaultState {
-		return e.GetBkgField()
+		return e.GetBkg().GetField()
 	} else if s == ButtonHoveredState {
 		return e.HoveredBackground
 	} else {
@@ -156,7 +156,7 @@ func (e *ButtonImpl) Init(window *pixelgl.Window, bounds *pixel.Rect) error {
 	if bounds != nil {
 		//If the default background hasn't been set
 		if e.backgrounds[ButtonDefaultState] == nil {
-			e.backgrounds[ButtonDefaultState] = e.Impl.GetBkgSprite()
+			e.backgrounds[ButtonDefaultState] = e.Impl.GetBkg().GetSprite()
 		}
 		//If the hovered background hasn't been made
 		if e.backgrounds[ButtonHoveredState] == nil {
@@ -190,7 +190,7 @@ func (e *ButtonImpl) Init(window *pixelgl.Window, bounds *pixel.Rect) error {
 }
 
 //Function to handle a button's new event
-func ButtonNewEvent(e HasButton, window *pixelgl.Window) {
+func ButtonNewEvent(e Button, window *pixelgl.Window) {
 	//Whether the button's state changed
 	stateChange := false
 	//If the mouse is actually in the window
@@ -198,8 +198,8 @@ func ButtonNewEvent(e HasButton, window *pixelgl.Window) {
 		e.GetCanvas().Bounds().Contains(window.MousePosition()) {
 		//If the mouse button is being pressed
 		if window.Pressed(pixelgl.MouseButtonLeft) {
-			stateChange = e.GetState() != ButtonPressedState
-			e.SetState(ButtonPressedState)
+			stateChange = e.GetButtonState() != ButtonPressedState
+			e.SetButtonState(ButtonPressedState)
 
 			//If the state changed
 			if stateChange {
@@ -211,12 +211,12 @@ func ButtonNewEvent(e HasButton, window *pixelgl.Window) {
 				}
 			}
 		} else {
-			stateChange = e.GetState() != ButtonHoveredState
-			e.SetState(ButtonHoveredState)
+			stateChange = e.GetButtonState() != ButtonHoveredState
+			e.SetButtonState(ButtonHoveredState)
 		}
 	} else {
-		stateChange = e.GetState() != ButtonDefaultState
-		e.SetState(ButtonDefaultState)
+		stateChange = e.GetButtonState() != ButtonDefaultState
+		e.SetButtonState(ButtonDefaultState)
 	}
 
 	//If the state was changed

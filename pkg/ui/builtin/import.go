@@ -55,6 +55,13 @@ func (e *Import) UnmarshalXML(d *xml.Decoder, start xml.StartElement) (err error
 	return d.Skip()
 }
 
+//Function to reset the element's
+//position
+func (e *Import) ResetPosition() {
+	e.Impl.ResetPosition()
+	e.LayoutImpl.ResetPosition()
+}
+
 //Function to reset the element
 func (e *Import) Reset() {
 	e.Impl.Reset()

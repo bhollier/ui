@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/orfby/ui/pkg/ui/util"
+	"image/color"
 	"math/bits"
 	"reflect"
 	"strconv"
@@ -148,6 +149,14 @@ func init() {
 		//Parsing a float64 type
 		reflect.TypeOf((*float64)(nil)).Elem(): func(attr string) (reflect.Value, error) {
 			val, err := strconv.ParseFloat(attr, 64)
+			if err != nil {
+				return reflect.Value{}, err
+			}
+			return reflect.ValueOf(val), nil
+		},
+		//Parsing a "color.RGBA" type
+		reflect.TypeOf((*color.RGBA)(nil)).Elem(): func(attr string) (reflect.Value, error) {
+			val, err := util.ParseColor(attr)
 			if err != nil {
 				return reflect.Value{}, err
 			}

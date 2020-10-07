@@ -76,6 +76,13 @@ func (e *Scroll) UnmarshalXML(d *xml.Decoder, start xml.StartElement) (err error
 	return nil
 }
 
+//Function to reset the element's
+//position
+func (e *Scroll) ResetPosition() {
+	e.Impl.ResetPosition()
+	e.LayoutImpl.ResetPosition()
+}
+
 //Function to reset the element
 func (e *Scroll) Reset() {
 	e.Impl.Reset()
@@ -178,8 +185,8 @@ func (e *Scroll) NewEvent(window *pixelgl.Window) {
 
 		//If the scroll moved
 		if prevBounds != *e.childBounds {
-			//Reset the child element
-			e.Children[0].Reset()
+			//Reset the child element's position
+			e.Children[0].ResetPosition()
 			//While the child is uninitialised
 			for !e.Children[0].IsInitialised() {
 				//Initialise it

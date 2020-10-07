@@ -66,6 +66,13 @@ func (e *FixedRatio) UnmarshalXML(d *xml.Decoder, start xml.StartElement) (err e
 	return nil
 }
 
+//Function to reset the element's
+//position
+func (e *FixedRatio) ResetPosition() {
+	e.Impl.ResetPosition()
+	e.LayoutImpl.ResetPosition()
+}
+
 //Function to reset the element
 func (e *FixedRatio) Reset() {
 	e.Impl.Reset()

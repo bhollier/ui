@@ -44,6 +44,12 @@ func (e *Image) UnmarshalXML(d *xml.Decoder, start xml.StartElement) (err error)
 	return d.Skip()
 }
 
+//Function to reset the element
+func (e *Image) Reset() {
+	e.Impl.Reset()
+	e.ImageImpl.Reset()
+}
+
 //Function to determine whether
 //the element is initialised
 func (e *Image) IsInitialised() bool {
@@ -64,13 +70,13 @@ func (e *Image) Init(window *pixelgl.Window, bounds *pixel.Rect) error {
 	}
 
 	//Initialise the image
-	err = element.InitImage(e)
+	err = element.InitImage(e, &e.ImageImpl)
 	if err != nil {
 		return err
 	}
 
 	//If no image was given
-	if e.GetImageField() == "" {
+	if e.ImageImpl.GetField() == "" {
 		//If it wants to match the content
 		if e.GetRelWidth().MatchContent {
 			return errors.New("invalid width attribute value 'match_content' on XML element '" +
@@ -91,5 +97,5 @@ func (e *Image) Draw() {
 	//Draw the element
 	e.Impl.Draw()
 	//Draw the image
-	element.DrawImage(e)
+	element.DrawImage(e, &e.ImageImpl)
 }

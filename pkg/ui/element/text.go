@@ -9,27 +9,22 @@ import (
 	"image/color"
 )
 
-//Interface for an element with text
-type HasText interface {
-	//An element with text is an
-	//element
-	Element
-
-	//Function to get the element's
-	//text XML field
-	GetTextField() string
-	//Function to get the element's
-	//text "sprite"
-	GetTextSprite() *text.Text
-	//Function to set the element's
-	//text "sprite"
-	SetTextSprite(*text.Text)
-	//Function to get the element's
-	//text size
+//Interface for some text
+type Text interface {
+	//Function to get the text
+	//XML field
+	GetField() string
+	//Function to get the text
+	//"sprite"
+	GetSprite() *text.Text
+	//Function to set the text
+	//"sprite"
+	SetSprite(*text.Text)
+	//Function to get the text size
 	GetTextSize() float64
 }
 
-//Type for an element's text
+//Implementation of the text interface
 type TextImpl struct {
 	//The element's text from xml
 	Text string `uixml:"http://github.com/orfby/ui/api/schema text,optional"`
@@ -39,21 +34,24 @@ type TextImpl struct {
 	textSprite *text.Text
 }
 
-//Function to get the element's
-//text XML field
-func (e *TextImpl) GetTextField() string { return e.Text }
+//Function to get the text
+//XML field
+func (t *TextImpl) GetField() string { return t.Text }
 
-//Function to get the element's
-//text sprite
-func (e *TextImpl) GetTextSprite() *text.Text { return e.textSprite }
+//Function to get the text
+//sprite
+func (t *TextImpl) GetSprite() *text.Text { return t.textSprite }
 
-//Function to set the element's
-//text sprite
-func (e *TextImpl) SetTextSprite(s *text.Text) { e.textSprite = s }
+//Function to set the text
+//sprite
+func (t *TextImpl) SetSprite(s *text.Text) { t.textSprite = s }
 
-//Function to get the element's
-//text size
-func (e *TextImpl) GetTextSize() float64 { return e.Size }
+//Function to get the text
+//size
+func (t *TextImpl) GetTextSize() float64 { return t.Size }
+
+//Function to reset the text
+func (t *TextImpl) Reset() {}
 
 //Function to determine whether the
 //text has been initialised, by
@@ -61,18 +59,18 @@ func (e *TextImpl) GetTextSize() float64 { return e.Size }
 //set (assuming it's meant to be set).
 //This function doesn't call
 //element.IsInitialised
-func (e *TextImpl) IsInitialised() bool {
+func (t *TextImpl) IsInitialised() bool {
 	//If the element doesn't have any text
 	//or the text has been set
-	return e.GetTextField() == "" || e.GetTextSprite() != nil
+	return t.GetField() == "" || t.GetSprite() != nil
 }
 
 //Function to initialise an element's
 //text. Doesn't call element.Init
-func InitText(e HasText, _ *pixel.Rect) error {
+func InitText(e Element, t Text, _ *pixel.Rect) error {
 	//If there should be text
 	//but it hasn't been made yet
-	if e.GetTextField() != "" && e.GetTextSprite() == nil {
+	if t.GetField() != "" && t.GetSprite() == nil {
 		//Get the font
 		ttf, err := truetype.Parse(goregular.TTF)
 		if err != nil {
@@ -80,7 +78,7 @@ func InitText(e HasText, _ *pixel.Rect) error {
 		}
 
 		//Get the text size
-		textSize := e.GetTextSize()
+		textSize := t.GetTextSize()
 		if textSize == 0 {
 			textSize = 24
 		}
@@ -88,23 +86,23 @@ func InitText(e HasText, _ *pixel.Rect) error {
 		//Create a new font face
 		face := truetype.NewFace(ttf, &truetype.Options{Size: textSize})
 		//Make a new text object
-		e.SetTextSprite(text.New(pixel.V(0, 0), text.NewAtlas(face, text.ASCII)))
+		t.SetSprite(text.New(pixel.V(0, 0), text.NewAtlas(face, text.ASCII)))
 		//Set the text colour
-		e.GetTextSprite().Color = color.RGBA{R: 0, G: 0, B: 0, A: 255}
+		t.GetSprite().Color = color.RGBA{R: 0, G: 0, B: 0, A: 255}
 		//Add the text
-		_, err = fmt.Fprintf(e.GetTextSprite(), e.GetTextField())
+		_, err = fmt.Fprintf(t.GetSprite(), t.GetField())
 		if err != nil {
 			return err
 		}
 	}
 
 	//If the sprite has been created
-	if e.GetTextSprite() != nil {
+	if t.GetSprite() != nil {
 		//If the element's width isn't known and
 		//the width is meant to match the content size
 		if e.GetActualWidth() == nil && e.GetRelWidth().MatchContent {
 			//Set the actual width as the size of the text sprite
-			newWidth := e.GetTextSprite().Bounds().Size().X
+			newWidth := t.GetSprite().Bounds().Size().X
 			e.SetActualWidth(&newWidth)
 		}
 
@@ -112,7 +110,7 @@ func InitText(e HasText, _ *pixel.Rect) error {
 		//the height is meant to match the content size
 		if e.GetActualHeight() == nil && e.GetRelHeight().MatchContent {
 			//Set the actual height as the size of the text sprite
-			newHeight := e.GetTextSprite().Bounds().Size().Y
+			newHeight := t.GetSprite().Bounds().Size().Y
 			e.SetActualHeight(&newHeight)
 		}
 	}
@@ -122,15 +120,15 @@ func InitText(e HasText, _ *pixel.Rect) error {
 
 //Function to draw an element's
 //text
-func DrawText(e HasText) {
+func DrawText(e Element, t Text) {
 	//Draw the text sprite, if it exists
-	if e.GetTextSprite() != nil {
+	if t.GetSprite() != nil {
 		mat := pixel.IM
 		//Move it to the center of the canvas
-		mat = mat.Moved(pixel.V(e.GetCanvas().Bounds().Center().X-(e.GetTextSprite().Bounds().Size().X/2),
-			e.GetCanvas().Bounds().Center().Y-(e.GetTextSprite().Bounds().Size().Y/2)))
+		mat = mat.Moved(pixel.V(e.GetCanvas().Bounds().Center().X-(t.GetSprite().Bounds().Size().X/2),
+			e.GetCanvas().Bounds().Center().Y-(t.GetSprite().Bounds().Size().Y/2)))
 		//todo why is it not centered properly?
-		//Draw the image
-		e.GetTextSprite().Draw(e.GetCanvas(), mat)
+		//Draw the text
+		t.GetSprite().Draw(e.GetCanvas(), mat)
 	}
 }

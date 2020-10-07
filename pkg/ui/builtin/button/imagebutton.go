@@ -43,7 +43,7 @@ func (e *ImageButton) UnmarshalXML(d *xml.Decoder, start xml.StartElement) (err 
 	}
 
 	//If no image was given
-	if e.GetImageField() == "" {
+	if e.ImageImpl.GetField() == "" {
 		//If it wants to match the content
 		if e.GetRelWidth().MatchContent {
 			return errors.New("invalid width attribute value 'match_content' on XML element '" +
@@ -57,6 +57,12 @@ func (e *ImageButton) UnmarshalXML(d *xml.Decoder, start xml.StartElement) (err 
 	}
 
 	return d.Skip()
+}
+
+//Function to reset the element
+func (e *ImageButton) Reset() {
+	e.ButtonImpl.Reset()
+	e.ImageImpl.Reset()
 }
 
 //Function to determine whether
@@ -75,7 +81,7 @@ func (e *ImageButton) Init(window *pixelgl.Window, bounds *pixel.Rect) error {
 	}
 
 	//Initialise the button's image
-	err = element.InitImage(e)
+	err = element.InitImage(e, &e.ImageImpl)
 	if err != nil {
 		return err
 	}
@@ -94,5 +100,5 @@ func (e *ImageButton) Draw() {
 	//Draw the button
 	e.ButtonImpl.Draw()
 	//Draw the image
-	element.DrawImage(e)
+	element.DrawImage(e, &e.ImageImpl)
 }

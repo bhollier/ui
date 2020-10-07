@@ -87,19 +87,27 @@ type Element interface {
 	//gravity
 	GetGravity() util.Gravity
 
+	//todo tint (or maybe foreground?)
+
+	//Function to get the element's
+	//background
+	GetBkg() Image
+
 	//Function to get the element's
 	//canvas
 	GetCanvas() *pixelgl.Canvas
-
-	//All elements have a background
-	Bkg
 
 	//Function to unmarshal an XML element
 	//into a UI element. This function is
 	//usually only called by xml.Unmarshal
 	UnmarshalXML(d *xml.Decoder, start xml.StartElement) error
 
+	//Function to reset the element's
+	//position
+	ResetPosition()
+
 	//Function to reset the element
+	//completely
 	Reset()
 
 	//Function to determine whether
@@ -160,11 +168,11 @@ type Impl struct {
 	//The element's padding
 	Padding util.AbsoluteQuantity `uixml:"http://github.com/orfby/ui/api/schema padding,optional"`
 
+	//The element's background
+	Bkg Background
+
 	//The element's canvas
 	Canvas *pixelgl.Canvas
-
-	//The element's background
-	BkgImpl
 
 	//The element's gravity
 	Gravity util.Gravity `uixml:"http://github.com/orfby/ui/api/schema gravity,optional"`
@@ -299,24 +307,41 @@ func (e *Impl) GetPadding() util.AbsoluteQuantity { return e.Padding }
 func (e *Impl) GetGravity() util.Gravity { return e.Gravity }
 
 //Function to get the element's
+//background
+func (e *Impl) GetBkg() Image { return &e.Bkg }
+
+//Function to get the element's
 //canvas
 func (e *Impl) GetCanvas() *pixelgl.Canvas { return e.Canvas }
 
 //Function to unmarshal an XML element into
 //an element. SetAttrs should've been called
 //before this function
-func (e *Impl) UnmarshalXML(*xml.Decoder, xml.StartElement) (err error) {
-	return nil
+func (e *Impl) UnmarshalXML(d *xml.Decoder, s xml.StartElement) (err error) {
+	//Unmarshal the background
+	return e.Bkg.UnmarshalXML(d, s)
 }
 
-//Function to reset the element
-func (e *Impl) Reset() {
-	//Set the width and height to nil
-	e.width = nil
-	e.height = nil
+//Function to reset the element's
+//position
+func (e *Impl) ResetPosition() {
 	//Set the min and max to nil
 	e.min = nil
 	e.max = nil
+}
+
+//Function to reset the element.
+//This function doesn't reset
+//the width and height of the
+//element
+func (e *Impl) Reset() {
+	//Reset the position
+	e.ResetPosition()
+	//Reset the background
+	e.Bkg.Reset()
+	//Reset the width and height
+	e.width = nil
+	e.height = nil
 }
 
 //Function to determine whether the
@@ -329,7 +354,7 @@ func (e *Impl) IsInitialised() bool {
 		e.GetMax() != nil &&
 		e.GetCanvas() != nil &&
 		e.GetCanvas().Bounds() == *e.GetBounds() &&
-		e.BkgImpl.IsInitialised()
+		e.Bkg.IsInitialised()
 }
 
 //Function to calculate an element's
@@ -514,7 +539,7 @@ func (e *Impl) Init(window *pixelgl.Window, bounds *pixel.Rect) error {
 	}
 
 	//Initialise the background
-	err := InitBkg(e, e.GetFS(), bounds)
+	err := InitBkg(e, &e.Bkg)
 	if err != nil {
 		return err
 	}
@@ -527,10 +552,12 @@ func (e *Impl) Init(window *pixelgl.Window, bounds *pixel.Rect) error {
 //nothing
 func (e *Impl) NewEvent(*pixelgl.Window) {}
 
-//Function to draw the element
+//Function to draw the element.
+//This function should be called
+//first
 func (e *Impl) Draw() {
 	//Draw the background
-	DrawBkg(e)
+	DrawBkg(e, &e.Bkg)
 }
 
 //Function to draw a canvas (usually an

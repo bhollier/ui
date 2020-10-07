@@ -50,7 +50,16 @@ func (e *LayoutImpl) GetChildByID(id string) Element {
 	return nil
 }
 
-//Function to reset the element
+//Function to reset the child
+//element's positions
+func (e *LayoutImpl) ResetPosition() {
+	for _, child := range e.Children {
+		child.ResetPosition()
+	}
+}
+
+//Function to reset the child
+//elements
 func (e *LayoutImpl) Reset() {
 	for _, child := range e.Children {
 		child.Reset()

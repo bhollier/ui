@@ -127,6 +127,13 @@ func (e *GridLayout) UnmarshalXML(d *xml.Decoder, start xml.StartElement) (err e
 	return nil
 }
 
+//Function to reset the element's
+//position
+func (e *GridLayout) ResetPosition() {
+	e.Impl.ResetPosition()
+	e.LayoutImpl.ResetPosition()
+}
+
 //Function to reset the element
 func (e *GridLayout) Reset() {
 	e.Impl.Reset()

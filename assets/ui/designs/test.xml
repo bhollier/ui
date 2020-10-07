@@ -1,8 +1,7 @@
 <GridLayout
         xmlns:builtin="http://github.com/orfby/ui/api/schema"
-        width="match_content"
+        builtin:width="match_content"
         builtin:height="match_parent"
-        builtin:gravity="right"
         builtin:columns="2"
         builtin:background="images/scalebkg-50px.png"
         builtin:bkg-scale="tiled">

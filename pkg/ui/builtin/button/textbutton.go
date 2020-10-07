@@ -43,7 +43,7 @@ func (e *TextButton) UnmarshalXML(d *xml.Decoder, start xml.StartElement) (err e
 	}
 
 	//If no text was given
-	if e.GetTextField() == "" {
+	if e.TextImpl.GetField() == "" {
 		//If it wants to match the content
 		if e.GetRelWidth().MatchContent {
 			return errors.New("invalid width attribute value 'match_content' on XML element '" +
@@ -57,6 +57,12 @@ func (e *TextButton) UnmarshalXML(d *xml.Decoder, start xml.StartElement) (err e
 	}
 
 	return d.Skip()
+}
+
+//Function to reset the element
+func (e *TextButton) Reset() {
+	e.ButtonImpl.Reset()
+	e.TextImpl.Reset()
 }
 
 //Function to determine whether
@@ -75,7 +81,7 @@ func (e *TextButton) Init(window *pixelgl.Window, bounds *pixel.Rect) error {
 	}
 
 	//Initialise the button's text
-	err = element.InitText(e, bounds)
+	err = element.InitText(e, &e.TextImpl, bounds)
 	if err != nil {
 		return err
 	}
@@ -94,5 +100,5 @@ func (e *TextButton) Draw() {
 	//Draw the button
 	e.ButtonImpl.Draw()
 	//Draw the text
-	element.DrawText(e)
+	element.DrawText(e, &e.TextImpl)
 }

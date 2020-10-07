@@ -138,7 +138,17 @@ Loop:
 	return nil
 }
 
-//Function to reset the element
+//Function to reset the child
+//element's positions
+func (e *Layout) ResetPosition() {
+	e.Impl.ResetPosition()
+	for _, child := range e.children {
+		child.ResetPosition()
+	}
+}
+
+//Function to reset the child
+//elements
 func (e *Layout) Reset() {
 	e.Impl.Reset()
 	for _, child := range e.children {
