@@ -8,6 +8,7 @@ import (
 	"github.com/srwiley/rasterx"
 	"image"
 	"image/color"
+	"image/draw"
 	_ "image/jpeg"
 	_ "image/png"
 	"io/ioutil"
@@ -62,25 +63,29 @@ func CreatePictureFromSVG(svg *oksvg.SvgIcon, scale ScaleOption,
 
 	// If the sprite should repeat
 	if scale == Tiled {
-		// Create a blank image
+		tileWidth, tileHeight := int(viewbox.Size().X), int(viewbox.Size().Y)
+
+		// Create a tile image
+		tile := image.NewRGBA(image.Rect(0, 0, tileWidth, tileHeight))
+
+		// Set the target area of the SVG
+		svg.SetTarget(0, 0, viewbox.Size().X, viewbox.Size().Y)
+
+		// Draw the SVG onto the image
+		svg.Draw(rasterx.NewDasher(tileWidth, tileHeight,
+			rasterx.NewScannerGV(tileWidth, tileHeight,
+				tile, tile.Bounds())), 1)
+
+		// Create the image itself
 		img := image.NewRGBA(image.Rect(0, 0, int(w), int(h)))
 
-		// Get the size of the svg
-		svgSize := viewbox.Size()
 		// Iterate over the y coords of each tile
-		for y := 0.0; y < h; y += svgSize.Y {
+		for y := 0; y < int(h); y += int(viewbox.Size().Y) {
 			// Iterate over the x coords of each tile
-			for x := 0.0; x < w; x += svgSize.X {
-				// Set the target area of the SVG
-				// todo transform
-				svg.SetTarget(viewbox.Min.X, viewbox.Min.Y,
-					viewbox.Max.X, viewbox.Max.Y)
-
-				// Draw the SVG onto the image
-				svg.Draw(rasterx.NewDasher(
-					int(svgSize.X), int(svgSize.Y),
-					rasterx.NewScannerGV(int(svgSize.X), int(svgSize.Y),
-						img, img.Bounds())), 1)
+			for x := 0; x < int(w); x += int(viewbox.Size().X) {
+				// Draw the tile onto the image
+				draw.Draw(img, image.Rect(x, y, x+int(viewbox.Size().X), y+int(viewbox.Size().Y)),
+					tile, image.Point{}, draw.Src)
 			}
 		}
 

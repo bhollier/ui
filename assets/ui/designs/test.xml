@@ -1,5 +1,5 @@
 <GridLayout
-        xmlns:builtin="http://github.com/orfby/ui/api/schema"
+        xmlns:builtin="http://github.com/bhollier/ui/api/schema"
         builtin:width="match_content"
         builtin:height="match_parent"
         builtin:columns="2"

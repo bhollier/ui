@@ -3,7 +3,7 @@ package relative
 import (
 	"encoding/xml"
 	"errors"
-	"github.com/orfby/ui/pkg/ui/element"
+	"github.com/bhollier/ui/pkg/ui/element"
 	"net/http"
 )
 
@@ -18,19 +18,19 @@ type relativeElement struct {
 
 	// The attribute for specifying which
 	// element this element goes on top of
-	TopOf relativePosition `uixml:"http://github.com/orfby/ui/api/schema top-of,optional"`
+	TopOf relativePosition `uixml:"http://github.com/bhollier/ui/api/schema top-of,optional"`
 	// The attribute for specifying which
 	// element this element goes on the
 	// bottom of
-	BottomOf relativePosition `uixml:"http://github.com/orfby/ui/api/schema bottom-of,optional"`
+	BottomOf relativePosition `uixml:"http://github.com/bhollier/ui/api/schema bottom-of,optional"`
 	// The attribute for specifying which
 	// element this element goes to the
 	// left of
-	LeftOf relativePosition `uixml:"http://github.com/orfby/ui/api/schema left-of,optional"`
+	LeftOf relativePosition `uixml:"http://github.com/bhollier/ui/api/schema left-of,optional"`
 	// The attribute for specifying which
 	// element this element goes to the
 	// right of
-	RightOf relativePosition `uixml:"http://github.com/orfby/ui/api/schema right-of,optional"`
+	RightOf relativePosition `uixml:"http://github.com/bhollier/ui/api/schema right-of,optional"`
 
 	// The element itself (the "hidden" tag
 	// means element.SetAttrs won't touch it)
@@ -59,10 +59,10 @@ func (e *relativeElement) UnmarshalXML(d *xml.Decoder, start xml.StartElement) (
 	relativeAttrs := make([]xml.Attr, 0)
 
 	// The names of the relative attributes
-	topOfName := xml.Name{Space: "http://github.com/orfby/ui/api/schema", Local: "top-of"}
-	bottomOfName := xml.Name{Space: "http://github.com/orfby/ui/api/schema", Local: "bottom-of"}
-	leftOfName := xml.Name{Space: "http://github.com/orfby/ui/api/schema", Local: "left-of"}
-	rightOfName := xml.Name{Space: "http://github.com/orfby/ui/api/schema", Local: "right-of"}
+	topOfName := xml.Name{Space: "http://github.com/bhollier/ui/api/schema", Local: "top-of"}
+	bottomOfName := xml.Name{Space: "http://github.com/bhollier/ui/api/schema", Local: "bottom-of"}
+	leftOfName := xml.Name{Space: "http://github.com/bhollier/ui/api/schema", Local: "left-of"}
+	rightOfName := xml.Name{Space: "http://github.com/bhollier/ui/api/schema", Local: "right-of"}
 	// Iterate over the attributes
 	for _, attr := range start.Attr {
 		// If the attribute isn't a relative attribute
@@ -82,7 +82,7 @@ func (e *relativeElement) UnmarshalXML(d *xml.Decoder, start xml.StartElement) (
 	}
 
 	// If both top and bottom are set
-	if e.TopOf != zeroRelativePosition && e.BottomOf != zeroRelativePosition {
+	/*if e.TopOf != zeroRelativePosition && e.BottomOf != zeroRelativePosition {
 		return errors.New("both 'top-of' and 'bottom-of' attributes set on XML element '" +
 			element.FullName(e, ".", false) + "'")
 	}
@@ -90,7 +90,7 @@ func (e *relativeElement) UnmarshalXML(d *xml.Decoder, start xml.StartElement) (
 	if e.LeftOf != zeroRelativePosition && e.RightOf != zeroRelativePosition {
 		return errors.New("both 'left-of' and 'right-of' attributes set on XML element '" +
 			element.FullName(e, ".", false) + "'")
-	}
+	}*/
 
 	// If none of the attributes are set
 	if e.TopOf == zeroRelativePosition && e.BottomOf == zeroRelativePosition &&

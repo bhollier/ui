@@ -2,9 +2,9 @@ package element
 
 import (
 	"encoding/xml"
+	"github.com/bhollier/ui/pkg/ui/util"
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
-	"github.com/orfby/ui/pkg/ui/util"
 	"log"
 	"net/http"
 )
@@ -64,17 +64,17 @@ type ButtonImpl struct {
 
 	// The button's background when
 	// being hovered over from XML
-	HoveredBackground string `uixml:"http://github.com/orfby/ui/api/schema bkg-hovered,optional"`
+	HoveredBackground string `uixml:"http://github.com/bhollier/ui/api/schema bkg-hovered,optional"`
 	// The button's background when
 	// being pressed from XML
-	PressedBackground string `uixml:"http://github.com/orfby/ui/api/schema bkg-pressed,optional"`
+	PressedBackground string `uixml:"http://github.com/bhollier/ui/api/schema bkg-pressed,optional"`
 
 	// The button's background
 	// sprites for each state
 	backgrounds map[ButtonState]*pixel.Sprite
 
 	// The element's press callback
-	PressCallback string `uixml:"http://github.com/orfby/ui/api/schema press-callback,optional"`
+	PressCallback string `uixml:"http://github.com/bhollier/ui/api/schema press-callback,optional"`
 }
 
 // Function to create a button element

@@ -2,8 +2,8 @@ package element
 
 import (
 	"encoding/xml"
+	"github.com/bhollier/ui/pkg/ui/util"
 	"github.com/faiface/pixel"
-	"github.com/orfby/ui/pkg/ui/util"
 	"github.com/srwiley/oksvg"
 	"image/color"
 	"path/filepath"
@@ -15,11 +15,11 @@ import (
 type Background struct {
 	// The background field
 	// from xml
-	Field string `uixml:"http://github.com/orfby/ui/api/schema background,optional"`
+	Field string `uixml:"http://github.com/bhollier/ui/api/schema background,optional"`
 	// The background's scale option
-	Scale util.ScaleOption `uixml:"http://github.com/orfby/ui/api/schema bkg-scale,optional"`
+	Scale util.ScaleOption `uixml:"http://github.com/bhollier/ui/api/schema bkg-scale,optional"`
 	// The background's colour
-	Color color.RGBA `uixml:"http://github.com/orfby/ui/api/schema bkg-color,optional"`
+	Color color.RGBA `uixml:"http://github.com/bhollier/ui/api/schema bkg-color,optional"`
 	// The background's svg (if
 	// applicable)
 	svg *oksvg.SvgIcon
@@ -104,16 +104,6 @@ func (b *Background) IsInitialised() bool {
 func InitBkg(e Element, i Image) error {
 	// If the image looks like an SVG
 	if i.IsSVG() {
-		// Convert the SVG's view box to a pixel rect
-		viewbox := pixel.R(i.GetSVG().ViewBox.X, i.GetSVG().ViewBox.Y,
-			i.GetSVG().ViewBox.W, i.GetSVG().ViewBox.H)
-		// If the view box's size is 0, 0
-		if viewbox.Size() == pixel.ZV {
-			// Change it to a 16x16 box
-			viewbox = pixel.R(
-				0, 0, 16, 16)
-		}
-
 		// If the SVG hasn't been loaded yet
 		if i.GetSVG() == nil {
 			// Load the svg

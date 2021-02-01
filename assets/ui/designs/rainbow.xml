@@ -1,5 +1,5 @@
 <Scroll
-        xmlns:builtin="http://github.com/orfby/ui/api/schema"
+        xmlns:builtin="http://github.com/bhollier/ui/api/schema"
         builtin:width="match_parent"
         builtin:height="match_parent"
         builtin:scroll-speed="30">

@@ -3,9 +3,9 @@ package builtin
 import (
 	"encoding/xml"
 	"errors"
+	"github.com/bhollier/ui/pkg/ui/element"
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
-	"github.com/orfby/ui/pkg/ui/element"
 	"log"
 	"net/http"
 )
@@ -18,7 +18,7 @@ type Scroll struct {
 	element.LayoutImpl
 
 	// The scroll rate
-	ScrollRate uint `uixml:"http://github.com/orfby/ui/api/schema scroll-speed,optional"`
+	ScrollRate uint `uixml:"http://github.com/bhollier/ui/api/schema scroll-speed,optional"`
 
 	// The parent bounds
 	parentBounds *pixel.Rect
@@ -32,7 +32,7 @@ func NewScroll(fs http.FileSystem, name xml.Name, parent element.Layout) element
 }
 
 // The XML name of the import element
-var ScrollTypeName = xml.Name{Space: "http://github.com/orfby/ui/api/schema", Local: "Scroll"}
+var ScrollTypeName = xml.Name{Space: "http://github.com/bhollier/ui/api/schema", Local: "Scroll"}
 
 // Function to unmarshal an XML element into
 // an element. This function is usually only

@@ -3,9 +3,9 @@ package button
 import (
 	"encoding/xml"
 	"errors"
+	"github.com/bhollier/ui/pkg/ui/element"
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
-	"github.com/orfby/ui/pkg/ui/element"
 	"net/http"
 )
 
@@ -24,7 +24,7 @@ func NewTextButton(fs http.FileSystem, name xml.Name, parent element.Layout) ele
 }
 
 // The XML name of the element
-var TextButtonTypeName = xml.Name{Space: "http://github.com/orfby/ui/api/schema", Local: "TextButton"}
+var TextButtonTypeName = xml.Name{Space: "http://github.com/bhollier/ui/api/schema", Local: "TextButton"}
 
 // Function to unmarshal an XML element into
 // an element. This function is usually only
@@ -81,10 +81,25 @@ func (e *TextButton) Init(window *pixelgl.Window, bounds *pixel.Rect) error {
 	}
 
 	// Initialise the button's text
-	err = element.InitText(e, &e.TextImpl, bounds)
+	err = element.InitText(e, &e.TextImpl)
 	if err != nil {
 		return err
 	}
+
+	// If no text was given
+	if e.TextImpl.GetField() == "" {
+		// If it wants to match the content
+		if e.GetRelWidth().MatchContent {
+			return errors.New("invalid width attribute value 'match_content' on XML element '" +
+				element.FullName(e, ".", false) +
+				"': no content to match")
+		} else if e.GetRelHeight().MatchContent {
+			return errors.New("invalid height attribute value 'match_content' on XML element '" +
+				element.FullName(e, ".", false) +
+				"': no content to match")
+		}
+	}
+
 	return nil
 }
 

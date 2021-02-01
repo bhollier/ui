@@ -1,7 +1,7 @@
 package relative
 
 import (
-	"github.com/orfby/ui/pkg/ui/util"
+	"github.com/bhollier/ui/pkg/ui/util"
 	"strings"
 )
 

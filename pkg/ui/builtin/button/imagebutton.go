@@ -3,9 +3,9 @@ package button
 import (
 	"encoding/xml"
 	"errors"
+	"github.com/bhollier/ui/pkg/ui/element"
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
-	"github.com/orfby/ui/pkg/ui/element"
 	"net/http"
 )
 
@@ -24,7 +24,7 @@ func NewImageButton(fs http.FileSystem, name xml.Name, parent element.Layout) el
 }
 
 // The XML name of the element
-var ImageButtonTypeName = xml.Name{Space: "http://github.com/orfby/ui/api/schema", Local: "ImageButton"}
+var ImageButtonTypeName = xml.Name{Space: "http://github.com/bhollier/ui/api/schema", Local: "ImageButton"}
 
 // Function to unmarshal an XML element into
 // an element. This function is usually only
@@ -85,6 +85,21 @@ func (e *ImageButton) Init(window *pixelgl.Window, bounds *pixel.Rect) error {
 	if err != nil {
 		return err
 	}
+
+	// If no image was given
+	if e.ImageImpl.GetField() == "" {
+		// If it wants to match the content
+		if e.GetRelWidth().MatchContent {
+			return errors.New("invalid width attribute value 'match_content' on XML element '" +
+				element.FullName(e, ".", false) +
+				"': no content to match")
+		} else if e.GetRelHeight().MatchContent {
+			return errors.New("invalid height attribute value 'match_content' on XML element '" +
+				element.FullName(e, ".", false) +
+				"': no content to match")
+		}
+	}
+
 	return nil
 }
 

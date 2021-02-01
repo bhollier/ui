@@ -1,8 +1,8 @@
 package element
 
 import (
+	"github.com/bhollier/ui/pkg/ui/util"
 	"github.com/faiface/pixel"
-	"github.com/orfby/ui/pkg/ui/util"
 	"github.com/srwiley/oksvg"
 	"image/color"
 	"log"
@@ -47,12 +47,12 @@ type Image interface {
 type ImageImpl struct {
 	// The image field from
 	// xml
-	Field string `uixml:"http://github.com/orfby/ui/api/schema source,optional"`
+	Field string `uixml:"http://github.com/bhollier/ui/api/schema source,optional"`
 	// The image's scale
 	// option
-	Scale util.ScaleOption `uixml:"http://github.com/orfby/ui/api/schema scale,optional"`
+	Scale util.ScaleOption `uixml:"http://github.com/bhollier/ui/api/schema scale,optional"`
 	// The image's colour
-	Color color.RGBA `uixml:"http://github.com/orfby/ui/api/schema color,optional"`
+	Color color.RGBA `uixml:"http://github.com/bhollier/ui/api/schema color,optional"`
 	// The image's svg (if
 	// applicable)
 	svg *oksvg.SvgIcon
@@ -237,8 +237,12 @@ func DrawImage(e Element, i Image) {
 			// If the scale is zero
 			scale := i.GetScale()
 			if scale == util.ZeroScaleOption {
-				// Set the scale as the default
-				scale = util.DefaultScaleOption
+				if i.GetField()[0] == '#' {
+					scale = util.Stretch
+				} else {
+					// Set the scale as the default
+					scale = util.DefaultScaleOption
+				}
 			}
 
 			// If the sprite should repeat

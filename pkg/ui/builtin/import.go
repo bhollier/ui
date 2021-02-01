@@ -2,9 +2,9 @@ package builtin
 
 import (
 	"encoding/xml"
+	"github.com/bhollier/ui/pkg/ui/element"
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
-	"github.com/orfby/ui/pkg/ui/element"
 	"net/http"
 )
 
@@ -16,7 +16,7 @@ type Import struct {
 	element.LayoutImpl
 
 	// The path to the design
-	Path string `uixml:"http://github.com/orfby/ui/api/schema path"`
+	Path string `uixml:"http://github.com/bhollier/ui/api/schema path"`
 }
 
 // Function to create a new import element
@@ -25,7 +25,7 @@ func NewImport(fs http.FileSystem, name xml.Name, parent element.Layout) element
 }
 
 // The XML name of the import element
-var ImportTypeName = xml.Name{Space: "http://github.com/orfby/ui/api/schema", Local: "Import"}
+var ImportTypeName = xml.Name{Space: "http://github.com/bhollier/ui/api/schema", Local: "Import"}
 
 // Function to unmarshal an XML element into
 // an element. This function is usually only

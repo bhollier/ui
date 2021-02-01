@@ -2,10 +2,10 @@ package layout
 
 import (
 	"encoding/xml"
+	"github.com/bhollier/ui/pkg/ui/element"
+	"github.com/bhollier/ui/pkg/ui/util"
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
-	"github.com/orfby/ui/pkg/ui/element"
-	"github.com/orfby/ui/pkg/ui/util"
 	"math"
 	"net/http"
 )
@@ -19,14 +19,14 @@ type GridLayout struct {
 	element.LayoutImpl
 
 	// The element's orientation
-	Orientation util.Orientation `uixml:"http://github.com/orfby/ui/api/schema orientation,optional"`
+	Orientation util.Orientation `uixml:"http://github.com/bhollier/ui/api/schema orientation,optional"`
 
 	// The number of columns on each row
-	Columns uint `uixml:"http://github.com/orfby/ui/api/schema columns,optional"`
+	Columns uint `uixml:"http://github.com/bhollier/ui/api/schema columns,optional"`
 	// The minimum width of a cell
-	CellWidth util.RelativeSize `uixml:"http://github.com/orfby/ui/api/schema cell-width,optional"`
+	CellWidth util.RelativeSize `uixml:"http://github.com/bhollier/ui/api/schema cell-width,optional"`
 	// The minimum height of a cell
-	CellHeight util.RelativeSize `uixml:"http://github.com/orfby/ui/api/schema cell-height,optional"`
+	CellHeight util.RelativeSize `uixml:"http://github.com/bhollier/ui/api/schema cell-height,optional"`
 
 	// The children in a grid format
 	grid [][]element.Element
@@ -44,7 +44,7 @@ func NewGridLayout(fs http.FileSystem, name xml.Name, parent element.Layout) ele
 }
 
 // The XML name of the element
-var GridLayoutTypeName = xml.Name{Space: "http://github.com/orfby/ui/api/schema", Local: "GridLayout"}
+var GridLayoutTypeName = xml.Name{Space: "http://github.com/bhollier/ui/api/schema", Local: "GridLayout"}
 
 // Function to unmarshal an XML element into
 // an element. This function is usually only

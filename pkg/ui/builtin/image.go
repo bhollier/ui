@@ -3,9 +3,9 @@ package builtin
 import (
 	"encoding/xml"
 	"errors"
+	"github.com/bhollier/ui/pkg/ui/element"
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
-	"github.com/orfby/ui/pkg/ui/element"
 	"net/http"
 )
 
@@ -25,7 +25,7 @@ func NewImage(fs http.FileSystem, name xml.Name, parent element.Layout) element.
 }
 
 // The XML name of the element
-var ImageTypeName = xml.Name{Space: "http://github.com/orfby/ui/api/schema", Local: "Image"}
+var ImageTypeName = xml.Name{Space: "http://github.com/bhollier/ui/api/schema", Local: "Image"}
 
 // Function to unmarshal an XML element into
 // an element. This function is usually only

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <xs:schema
         xmlns:xs="http://www.w3.org/2001/XMLSchema"
-        xmlns="http://github.com/orfby/ui/api/schema"
-        targetNamespace="http://github.com/orfby/ui/api/schema">
+        xmlns="http://github.com/bhollier/ui/api/schema"
+        targetNamespace="http://github.com/bhollier/ui/api/schema">
     <xs:simpleType name="relative-size">
         <xs:restriction base="xs:string">
             <xs:pattern value="(match_parent)|(match_content)|(\d+(px)|(%))"/>

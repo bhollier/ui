@@ -1,10 +1,10 @@
 package ui
 
 import (
+	_ "github.com/bhollier/ui/pkg/ui/builtin"
+	"github.com/bhollier/ui/pkg/ui/element"
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
-	_ "github.com/orfby/ui/pkg/ui/builtin"
-	"github.com/orfby/ui/pkg/ui/element"
 	"log"
 	"net/http"
 	"sync"
@@ -69,7 +69,8 @@ func (d *Design) Init() (err error) {
 	return d.update(d.root)
 }
 
-// Function to start the design
+// Function to start the design with
+// a simple event routine
 func (d *Design) Start() { go d.pollEvents() }
 
 // Function to wait for the design to close
@@ -88,7 +89,46 @@ func (d *Design) Wait() {
 func (d *Design) StartThenWait() { d.Start(); d.Wait() }
 
 // Function to get the design's window
-func (d *Design) GetWindow() *pixelgl.Window { return d.window }
+func (d *Design) Window() *pixelgl.Window { return d.window }
+
+// Function to get the root node of the
+// design
+func (d *Design) Root() element.Element { return d.root.Element }
+
+// Recursive function to search for an
+// element in with the given ID.
+func findElementByID(elem element.Element, id string) element.Element {
+	// If the element is a match
+	if elem.GetID() != nil && *elem.GetID() == id {
+		return elem
+	}
+	// Try to convert it to a layout
+	layout, ok := elem.(element.Layout)
+	if ok {
+		// Do a shallow search
+		elem = layout.GetChildByID(id)
+		if elem != nil {
+			return elem
+		}
+		// Otherwise iterate over the layout's children
+		for i := 0; i < layout.NumChildren(); i++ {
+			// Search the child for the matching element
+			elem = findElementByID(layout.GetChild(i), id)
+			if elem != nil {
+				return elem
+			}
+		}
+	}
+	return nil
+}
+
+// Function to recursively find an element
+// in the design with the given ID. Returns
+// nil if no child could be found
+func (d *Design) FindElementByID(id string) element.Element {
+	// Call the recursive function on the root node
+	return findElementByID(d.root.Element, id)
+}
 
 // Function to update the design
 func (d *Design) update(root *element.Root) error {
@@ -114,6 +154,17 @@ func (d *Design) pollEvents() {
 		// Wait for a new event
 		d.window.UpdateInputWait(time.Second)
 
+		// If the window bounds changed
+		if d.prevWindowBounds != d.window.Bounds() {
+			// Update the design
+			d.Lock()
+			err := d.update(d.root)
+			d.Unlock()
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
+
 		// Make sure the window is in focus
 		if d.window.Focused() {
 			// If ctrl + shift + r was pressed
@@ -137,16 +188,6 @@ func (d *Design) pollEvents() {
 				d.Lock()
 				d.root = newRoot
 				d.Unlock()
-
-				// If the window bounds changed
-			} else if d.prevWindowBounds != d.window.Bounds() {
-				// Update the design
-				d.Lock()
-				err := d.update(d.root)
-				d.Unlock()
-				if err != nil {
-					log.Fatal(err)
-				}
 			}
 
 			// Tell the root element

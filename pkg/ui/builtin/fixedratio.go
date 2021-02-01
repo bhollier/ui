@@ -3,10 +3,10 @@ package builtin
 import (
 	"encoding/xml"
 	"errors"
+	"github.com/bhollier/ui/pkg/ui/element"
+	"github.com/bhollier/ui/pkg/ui/util"
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
-	"github.com/orfby/ui/pkg/ui/element"
-	"github.com/orfby/ui/pkg/ui/util"
 	"net/http"
 )
 
@@ -19,7 +19,7 @@ type FixedRatio struct {
 	element.LayoutImpl
 
 	// The ratio itself
-	Ratio util.Ratio `uixml:"http://github.com/orfby/ui/api/schema ratio"`
+	Ratio util.Ratio `uixml:"http://github.com/bhollier/ui/api/schema ratio"`
 }
 
 // Function to create a new fixed ratio element
@@ -28,7 +28,7 @@ func NewFixedRatio(fs http.FileSystem, name xml.Name, parent element.Layout) ele
 }
 
 // The XML name of the import element
-var FixedRatioTypeName = xml.Name{Space: "http://github.com/orfby/ui/api/schema", Local: "FixedRatio"}
+var FixedRatioTypeName = xml.Name{Space: "http://github.com/bhollier/ui/api/schema", Local: "FixedRatio"}
 
 // Function to unmarshal an XML element into
 // an element. This function is usually only
@@ -103,6 +103,21 @@ func (e *FixedRatio) Init(window *pixelgl.Window, bounds *pixel.Rect) (err error
 	if bounds != nil {
 		// Calculate the correct dimensions of the child
 		dimensions := e.Ratio.RestrictDimensions(bounds.Size())
+
+		// If the bounds are integers
+		boundsSize := bounds.Size()
+		if boundsSize == boundsSize.Floor() {
+			// While the dimensions aren't integers
+			for dimensions.Floor() != dimensions {
+				if dimensions.X == bounds.Size().X {
+					boundsSize.X -= 1
+					dimensions = e.Ratio.RestrictDimensions(boundsSize)
+				} else {
+					boundsSize.Y -= 1
+					dimensions = e.Ratio.RestrictDimensions(boundsSize)
+				}
+			}
+		}
 
 		// Calculate the minimum point for the child (based on gravity)
 		min := element.CalculateMin(e, bounds, dimensions)

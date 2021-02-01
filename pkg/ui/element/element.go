@@ -3,9 +3,9 @@ package element
 import (
 	"encoding/xml"
 	"errors"
+	"github.com/bhollier/ui/pkg/ui/util"
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
-	"github.com/orfby/ui/pkg/ui/util"
 	"github.com/xlab/treeprint"
 	"net/http"
 )
@@ -144,12 +144,12 @@ type Impl struct {
 	namespaces []string
 
 	// The element's ID
-	ID string `uixml:"http://github.com/orfby/ui/api/schema id,optional"`
+	ID string `uixml:"http://github.com/bhollier/ui/api/schema id,optional"`
 
 	// The element's relative width
-	RelativeWidth util.RelativeSize `uixml:"http://github.com/orfby/ui/api/schema width"`
+	RelativeWidth util.RelativeSize `uixml:"http://github.com/bhollier/ui/api/schema width"`
 	// The element's relative height
-	RelativeHeight util.RelativeSize `uixml:"http://github.com/orfby/ui/api/schema height"`
+	RelativeHeight util.RelativeSize `uixml:"http://github.com/bhollier/ui/api/schema height"`
 
 	// The element's width
 	// (or nil, if unknown)
@@ -166,16 +166,16 @@ type Impl struct {
 	max *pixel.Vec
 
 	// The element's padding
-	Padding util.AbsoluteQuantity `uixml:"http://github.com/orfby/ui/api/schema padding,optional"`
+	Padding util.AbsoluteQuantity `uixml:"http://github.com/bhollier/ui/api/schema padding,optional"`
 
 	// The element's background
 	Bkg Background
 
 	// The element's canvas
-	Canvas *pixelgl.Canvas
+	canvas *pixelgl.Canvas
 
 	// The element's gravity
-	Gravity util.Gravity `uixml:"http://github.com/orfby/ui/api/schema gravity,optional"`
+	Gravity util.Gravity `uixml:"http://github.com/bhollier/ui/api/schema gravity,optional"`
 }
 
 // Function to create an element
@@ -312,7 +312,7 @@ func (e *Impl) GetBkg() Image { return &e.Bkg }
 
 // Function to get the element's
 // canvas
-func (e *Impl) GetCanvas() *pixelgl.Canvas { return e.Canvas }
+func (e *Impl) GetCanvas() *pixelgl.Canvas { return e.canvas }
 
 // Function to unmarshal an XML element into
 // an element. SetAttrs should've been called
@@ -530,11 +530,11 @@ func (e *Impl) Init(window *pixelgl.Window, bounds *pixel.Rect) error {
 	// If the bounds are known
 	if e.GetBounds() != nil {
 		// If the canvas hasn't been made
-		if e.Canvas == nil {
+		if e.GetCanvas() == nil {
 			// Create a canvas
-			e.Canvas = pixelgl.NewCanvas(*e.GetBounds())
+			e.canvas = pixelgl.NewCanvas(*e.GetBounds())
 		} else {
-			e.Canvas.SetBounds(*e.GetBounds())
+			e.GetCanvas().SetBounds(*e.GetBounds())
 		}
 	}
 

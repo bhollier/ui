@@ -2,9 +2,9 @@ package main
 
 import (
 	"flag"
+	"github.com/bhollier/ui/pkg/ui"
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
-	"github.com/orfby/ui/pkg/ui"
 	"log"
 	"net/http"
 	"os"
@@ -72,6 +72,6 @@ func main() {
 		}
 
 		// Start then wait for it to finish
-		design.StartThenWait()
+		design.StartThenWait(true)
 	})
 }

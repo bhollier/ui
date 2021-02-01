@@ -1,9 +1,9 @@
 package builtin
 
 import (
-	_ "github.com/orfby/ui/pkg/ui/builtin/button"
-	_ "github.com/orfby/ui/pkg/ui/builtin/layout"
-	"github.com/orfby/ui/pkg/ui/element"
+	_ "github.com/bhollier/ui/pkg/ui/builtin/button"
+	_ "github.com/bhollier/ui/pkg/ui/builtin/layout"
+	"github.com/bhollier/ui/pkg/ui/element"
 	"reflect"
 )
 
@@ -18,4 +18,6 @@ func init() {
 		reflect.TypeOf((*Import)(nil)).Elem(), NewImport)
 	element.Register(ScrollTypeName,
 		reflect.TypeOf((*Scroll)(nil)).Elem(), NewScroll)
+	element.Register(TextTypeName,
+		reflect.TypeOf((*Text)(nil)).Elem(), NewText)
 }

@@ -3,10 +3,10 @@ package relative
 import (
 	"encoding/xml"
 	"errors"
+	"github.com/bhollier/ui/pkg/ui/element"
+	"github.com/bhollier/ui/pkg/ui/util"
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
-	"github.com/orfby/ui/pkg/ui/element"
-	"github.com/orfby/ui/pkg/ui/util"
 	"net/http"
 )
 
@@ -28,7 +28,7 @@ func NewLayout(fs http.FileSystem, name xml.Name, parent element.Layout) element
 }
 
 // The XML name of the element
-var LayoutTypeName = xml.Name{Space: "http://github.com/orfby/ui/api/schema", Local: "RelativeLayout"}
+var LayoutTypeName = xml.Name{Space: "http://github.com/bhollier/ui/api/schema", Local: "RelativeLayout"}
 
 // Function to get one of a layout's
 // child elements
@@ -44,7 +44,7 @@ func (e *Layout) NumChildren() int { return len(e.children) }
 func (e *Layout) GetChildByID(id string) element.Element {
 	for _, child := range e.children {
 		if child.GetID() != nil && *child.GetID() == id {
-			return &child
+			return child.Element
 		}
 	}
 	return nil
@@ -174,246 +174,271 @@ func (e *Layout) Init(window *pixelgl.Window, bounds *pixel.Rect) error {
 	// Iterate over the elements
 	for _, child := range e.children {
 		// Create the child's bounds
-		childBounds := &pixel.Rect{Min: pixel.V(-1, -1), Max: pixel.V(-1, -1)}
-		ySet := false
+		var childBounds *pixel.Rect
+		// If the bounds are known, then the
+		// child bounds' default is the parent
+		if bounds != nil {
+			childBounds = new(pixel.Rect)
+			*childBounds = *bounds
+		}
+
 		xSet := false
+		ySet := false
 
-		if bounds == nil {
-			childBounds = nil
-		} else {
-			// If the child's width and height are known
-			if child.GetActualWidth() != nil && child.GetActualHeight() != nil {
-				// If the child has a top of attribute
-				if child.TopOf != zeroRelativePosition {
-					// If the child is at the top of the parent
-					if child.TopOf.Parent {
-						// Set the max Y of the child bounds
-						childBounds.Max.Y = bounds.Max.Y
-						childBounds.Min.Y = childBounds.Max.Y -
-							*child.GetActualHeight()
+		// Create a function to modify the child bounds
+		// for each of the child's relative position
+		type location string
+		const topOf = location("top-of")
+		const bottomOf = location("bottom-of")
+		const leftOf = location("left-of")
+		const rightOf = location("right-of")
+		modBounds := func(child *relativeElement, loc location, pos relativePosition) error {
+			// If the child has a relative position attribute
+			if pos != zeroRelativePosition {
+				// If the child is aligned to the parent
+				if pos.Parent {
+					// Switch over the locations
+					switch loc {
+					case topOf:
+						if !child.GetRelHeight().MatchBounds {
+							if child.GetActualHeight() != nil {
+								childBounds.Min.Y = childBounds.Max.Y -
+									*child.GetActualHeight()
+							} else {
+								childBounds = nil
+								return nil
+							}
+						}
+						ySet = true
+					case bottomOf:
+						if !child.GetRelHeight().MatchBounds {
+							if child.GetActualHeight() != nil {
+								childBounds.Max.Y = childBounds.Min.Y +
+									*child.GetActualHeight()
+							} else {
+								childBounds = nil
+								return nil
+							}
+						}
+						ySet = true
+					case leftOf:
+						if !child.GetRelWidth().MatchBounds {
+							if child.GetActualWidth() != nil {
+								childBounds.Max.X = childBounds.Min.X +
+									*child.GetActualWidth()
+							} else {
+								childBounds = nil
+								return nil
+							}
+						}
+						xSet = true
+					case rightOf:
+						if !child.GetRelWidth().MatchBounds {
+							if child.GetActualWidth() != nil {
+								childBounds.Min.X = childBounds.Max.X -
+									*child.GetActualWidth()
+							} else {
+								childBounds = nil
+								return nil
+							}
+						}
+						xSet = true
+					}
 
-						// If it's relative to a position
-					} else if child.TopOf.Pos != util.ZeroRelativeQuantity {
+					// If it's relative to a position
+				} else if pos.Pos != util.ZeroRelativeQuantity {
+					// Switch over the locations
+					switch loc {
+					case topOf:
 						// If the position is a percentage
-						if child.TopOf.Pos.Unit == util.Percent {
+						if pos.Pos.Unit == util.Percent {
 							childBounds.Max.Y = bounds.Max.Y - bounds.Size().Y*
-								(float64(child.TopOf.Pos.Quantity)/100)
-							childBounds.Min.Y = childBounds.Max.Y +
-								*child.GetActualHeight()
-
+								(float64(pos.Pos.Quantity)/100)
 							// If the position is just in pixels
 						} else {
-							childBounds.Max.Y = bounds.Max.Y - float64(child.TopOf.Pos.Quantity)
-							childBounds.Min.Y = childBounds.Max.Y +
-								*child.GetActualHeight()
+							childBounds.Max.Y = bounds.Max.Y - float64(pos.Pos.Quantity)
 						}
+						if !child.GetRelHeight().MatchBounds {
+							if child.GetActualHeight() != nil {
+								childBounds.Min.Y = childBounds.Max.Y +
+									*child.GetActualHeight()
+							} else {
+								childBounds = nil
+								return nil
+							}
+						}
+						ySet = true
+					case bottomOf:
+						// If the position is a percentage
+						if pos.Pos.Unit == util.Percent {
+							childBounds.Min.Y = bounds.Min.Y + bounds.Size().Y*
+								(float64(pos.Pos.Quantity)/100)
+							// If the position is just in pixels
+						} else {
+							childBounds.Min.Y = bounds.Min.Y + float64(pos.Pos.Quantity)
+						}
+						if !child.GetRelHeight().MatchBounds {
+							if child.GetActualHeight() != nil {
+								childBounds.Max.Y = childBounds.Min.Y +
+									*child.GetActualHeight()
+							} else {
+								childBounds = nil
+								return nil
+							}
+						}
+						ySet = true
+					case leftOf:
+						// If the position is a percentage
+						if pos.Pos.Unit == util.Percent {
+							childBounds.Max.X = bounds.Min.X + bounds.Size().X*
+								(float64(pos.Pos.Quantity)/100)
+							// If the position is just in pixels
+						} else {
+							childBounds.Max.X = bounds.Min.X + float64(pos.Pos.Quantity)
+						}
+						if !child.GetRelWidth().MatchBounds {
+							if child.GetActualWidth() != nil {
+								childBounds.Min.X = childBounds.Max.X -
+									*child.GetActualWidth()
+							} else {
+								childBounds = nil
+								return nil
+							}
+						}
+						xSet = true
+					case rightOf:
+						// If the position is a percentage
+						if pos.Pos.Unit == util.Percent {
+							childBounds.Min.X = bounds.Min.X + bounds.Size().X*
+								(float64(pos.Pos.Quantity)/100)
+							// If the position is just in pixels
+						} else {
+							childBounds.Min.X = bounds.Min.X + float64(pos.Pos.Quantity)
+						}
+						if !child.GetRelWidth().MatchBounds {
+							if child.GetActualWidth() != nil {
+								childBounds.Max.X = childBounds.Min.X +
+									*child.GetActualWidth()
+							} else {
+								childBounds = nil
+								return nil
+							}
+						}
+						xSet = true
+					}
 
-						// If it's relative to an element
-					} else {
-						// Get the element
-						relativeElem := e.GetChildByID(child.TopOf.ElementID)
-						// This shouldn't happen, but check it anyways
-						if relativeElem == nil {
-							return element.NewNoElemError(child.Element, child.TopOf.ElementID, "top-of")
-						}
-						if relativeElem.GetMin() != nil &&
-							relativeElem.GetMax() != nil {
+					// If it's relative to an element
+				} else {
+					// Get the element
+					relativeElem := e.GetChildByID(pos.ElementID)
+					// This shouldn't happen, but check it anyways
+					if relativeElem == nil {
+						return element.NewNoElemError(child.Element, child.TopOf.ElementID, string(loc))
+					}
+					if relativeElem.GetMin() != nil &&
+						relativeElem.GetMax() != nil {
+						switch loc {
+						case topOf:
 							// Set the bounds to be the same as the element's
 							childBounds.Max.Y = relativeElem.GetMax().Y
-							childBounds.Min.Y = childBounds.Max.Y +
-								*child.GetActualHeight()
-
-							// Set the X bounds as well
-							childBounds.Min.X = relativeElem.GetMin().X
-							childBounds.Max.X = relativeElem.GetMax().X
-							xSet = true
-						} else {
-							childBounds = nil
-						}
-					}
-					ySet = true
-
-					// If the child has a bottom of of attribute
-				} else if child.BottomOf != zeroRelativePosition {
-					// If the child is at the bottom of the parent
-					if child.BottomOf.Parent {
-						// Set the min Y of the child bounds
-						childBounds.Min.Y = bounds.Min.Y
-						childBounds.Max.Y = childBounds.Min.Y +
-							*child.GetActualHeight()
-
-						// If it's relative to a position
-					} else if child.BottomOf.Pos != util.ZeroRelativeQuantity {
-						// If the position is a percentage
-						if child.BottomOf.Pos.Unit == util.Percent {
-							childBounds.Min.Y = bounds.Max.Y - bounds.Size().Y*
-								(float64(child.BottomOf.Pos.Quantity)/100)
-							childBounds.Max.Y = childBounds.Min.Y -
-								*child.GetActualHeight()
-
-							// If the position is just in pixels
-						} else {
-							childBounds.Max.Y = bounds.Max.Y - float64(child.BottomOf.Pos.Quantity)
-							childBounds.Min.Y = childBounds.Max.Y -
-								*child.GetActualHeight()
-						}
-
-						// If it's relative to an element
-					} else {
-						// Get the element
-						relativeElem := e.GetChildByID(child.BottomOf.ElementID)
-						// This shouldn't happen, but check it anyways
-						if relativeElem == nil {
-							return element.NewNoElemError(child.Element, child.BottomOf.ElementID, "bottom-of")
-						}
-						if relativeElem.GetMin() != nil &&
-							relativeElem.GetMax() != nil {
+							if !child.GetRelHeight().MatchBounds {
+								if child.GetActualHeight() != nil {
+									childBounds.Min.Y = childBounds.Max.Y +
+										*child.GetActualHeight()
+								} else {
+									childBounds = nil
+									return nil
+								}
+							}
+							ySet = true
+							if !xSet {
+								// Set the X bounds as well
+								childBounds.Min.X = relativeElem.GetMin().X
+								childBounds.Max.X = relativeElem.GetMax().X
+							}
+						case bottomOf:
 							// Set the bounds to be the same as the element's
 							childBounds.Min.Y = relativeElem.GetMin().Y
-							childBounds.Max.Y = childBounds.Min.Y -
-								*child.GetActualHeight()
-
-							// Set the X bounds as well
-							childBounds.Min.X = relativeElem.GetMin().X
-							childBounds.Max.X = relativeElem.GetMax().X
+							if !child.GetRelHeight().MatchBounds {
+								if child.GetActualHeight() != nil {
+									childBounds.Max.Y = childBounds.Min.Y -
+										*child.GetActualHeight()
+								} else {
+									childBounds = nil
+									return nil
+								}
+							}
+							ySet = true
+							if !xSet {
+								// Set the X bounds as well
+								childBounds.Min.X = relativeElem.GetMin().X
+								childBounds.Max.X = relativeElem.GetMax().X
+							}
+						case leftOf:
+							// Set the bounds to be the same as the element's
+							childBounds.Max.X = relativeElem.GetMin().X
+							if !child.GetRelWidth().MatchBounds {
+								if child.GetActualWidth() != nil {
+									childBounds.Min.X = childBounds.Max.X -
+										*child.GetActualWidth()
+								} else {
+									childBounds = nil
+									return nil
+								}
+							}
 							xSet = true
-						} else {
-							childBounds = nil
-						}
-					}
-					ySet = true
-				}
-
-				// If the child bounds can still be calculated
-				if childBounds != nil {
-					// If the child has a left of attribute
-					if child.LeftOf != zeroRelativePosition {
-						// If the child is at the left of the parent
-						if child.LeftOf.Parent {
-							// Set the max X of the child bounds
-							childBounds.Min.X = bounds.Min.X
-							childBounds.Max.X = childBounds.Min.X +
-								*child.GetActualWidth()
-
-							// If it's relative to a position
-						} else if child.LeftOf.Pos != util.ZeroRelativeQuantity {
-							// If the position is a percentage
-							if child.LeftOf.Pos.Unit == util.Percent {
-								childBounds.Max.X = bounds.Min.X + bounds.Size().X*
-									(float64(child.LeftOf.Pos.Quantity)/100)
-								childBounds.Min.X = childBounds.Max.X -
-									*child.GetActualWidth()
-
-								// If the position is just in pixels
-							} else {
-								childBounds.Max.X = bounds.Min.X + float64(child.LeftOf.Pos.Quantity)
-								childBounds.Min.X = childBounds.Max.X -
-									*child.GetActualWidth()
+							if !ySet {
+								// Set the Y bounds
+								childBounds.Min.Y = relativeElem.GetMin().Y
+								childBounds.Max.Y = relativeElem.GetMax().Y
 							}
-
-							// If it's relative to an element
-						} else {
-							// Get the element
-							relativeElem := e.GetChildByID(child.LeftOf.ElementID)
-							// This shouldn't happen, but check it anyways
-							if relativeElem == nil {
-								return element.NewNoElemError(child.Element, child.LeftOf.ElementID, "left-of")
-							}
-							if relativeElem.GetMin() != nil &&
-								relativeElem.GetMax() != nil {
-								// Set the bounds to be the same as the element's
-								childBounds.Max.X = relativeElem.GetMin().X
-								childBounds.Min.X = childBounds.Max.X -
-									*child.GetActualWidth()
-
-								// If the Y bounds aren't set
-								if !ySet {
-									// Set the Y bounds
-									childBounds.Min.Y = relativeElem.GetMin().Y
-									childBounds.Max.Y = relativeElem.GetMax().Y
-									ySet = true
+						case rightOf:
+							// Set the bounds to be the same as the element's
+							childBounds.Min.X = relativeElem.GetMax().X
+							if !child.GetRelWidth().MatchBounds {
+								if child.GetActualWidth() != nil {
+									childBounds.Max.X = childBounds.Min.X +
+										*child.GetActualWidth()
 								}
-
-							} else {
-								childBounds = nil
+							}
+							xSet = true
+							if !ySet {
+								// Set the Y bounds
+								childBounds.Min.Y = relativeElem.GetMin().Y
+								childBounds.Max.Y = relativeElem.GetMax().Y
 							}
 						}
-						xSet = true
-
-						// If the child has a right of of attribute
-					} else if child.RightOf != zeroRelativePosition {
-						// If the child is at the right of the parent
-						if child.RightOf.Parent {
-							// Set the min X of the child bounds
-							childBounds.Max.X = bounds.Max.X
-							childBounds.Min.X = childBounds.Max.X -
-								*child.GetActualWidth()
-
-							// If it's relative to a position
-						} else if child.RightOf.Pos != util.ZeroRelativeQuantity {
-							// If the position is a percentage
-							if child.RightOf.Pos.Unit == util.Percent {
-								childBounds.Min.X = bounds.Min.X + bounds.Size().X*
-									(float64(child.RightOf.Pos.Quantity)/100)
-								childBounds.Max.X = childBounds.Min.X +
-									*child.GetActualWidth()
-
-								// If the position is just in pixels
-							} else {
-								childBounds.Min.X = bounds.Min.X + float64(child.RightOf.Pos.Quantity)
-								childBounds.Max.X = childBounds.Max.X +
-									*child.GetActualWidth()
-							}
-
-							// If it's relative to an element
-						} else {
-							// Get the element
-							relativeElem := e.GetChildByID(child.RightOf.ElementID)
-							// This shouldn't happen, but check it anyways
-							if relativeElem == nil {
-								return element.NewNoElemError(child.Element, child.BottomOf.ElementID, "right-of")
-							}
-							if relativeElem.GetMin() != nil &&
-								relativeElem.GetMax() != nil {
-								// Set the bounds to be the same as the element's
-								childBounds.Min.X = relativeElem.GetMax().X
-								childBounds.Max.X = childBounds.Min.X +
-									*child.GetActualWidth()
-
-								// If the Y bounds aren't set
-								if !ySet {
-									// Set the Y bounds
-									childBounds.Min.Y = relativeElem.GetMin().Y
-									childBounds.Max.Y = relativeElem.GetMax().Y
-									ySet = true
-								}
-							} else {
-								childBounds = nil
-							}
-						}
-						xSet = true
+					} else {
+						childBounds = nil
+						return nil
 					}
 				}
-			} else {
-				childBounds = nil
 			}
+			return nil
+		}
 
-			// If the child bounds can still be calculated
-			if childBounds != nil {
-				// If the Y wasn't set
-				if !ySet {
-					// Set the Y child bounds as
-					// the whole height of the parent
-					childBounds.Min.Y = bounds.Min.Y
-					childBounds.Max.Y = bounds.Max.Y
-				}
-				// If the X wasn't set
-				if !xSet {
-					// set the X child bounds as
-					// the whole width of the parent
-					childBounds.Min.X = bounds.Min.X
-					childBounds.Max.X = bounds.Max.X
-				}
+		if childBounds != nil {
+			err = modBounds(&child, topOf, child.TopOf)
+			if err != nil {
+				return err
+			}
+		}
+		if childBounds != nil {
+			err = modBounds(&child, bottomOf, child.BottomOf)
+			if err != nil {
+				return err
+			}
+		}
+		if childBounds != nil {
+			err = modBounds(&child, leftOf, child.LeftOf)
+			if err != nil {
+				return err
+			}
+		}
+		if childBounds != nil {
+			err = modBounds(&child, rightOf, child.RightOf)
+			if err != nil {
+				return err
 			}
 		}
 

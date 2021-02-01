@@ -1,8 +1,8 @@
 package element
 
 import (
+	"github.com/bhollier/ui/pkg/ui/util"
 	"github.com/faiface/pixel"
-	"github.com/orfby/ui/pkg/ui/util"
 )
 
 // Function to initialise an image
@@ -24,7 +24,11 @@ func initIcon(e Element, i Image) error {
 	// Get the scale
 	scale := i.GetScale()
 	if scale == util.ZeroScaleOption {
-		scale = util.DefaultScaleOption
+		if i.GetField()[0] == '#' {
+			scale = util.Stretch
+		} else {
+			scale = util.DefaultScaleOption
+		}
 	}
 
 	// If the svg has been loaded

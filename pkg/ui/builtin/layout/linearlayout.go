@@ -2,10 +2,10 @@ package layout
 
 import (
 	"encoding/xml"
+	"github.com/bhollier/ui/pkg/ui/element"
+	"github.com/bhollier/ui/pkg/ui/util"
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
-	"github.com/orfby/ui/pkg/ui/element"
-	"github.com/orfby/ui/pkg/ui/util"
 	"math"
 	"net/http"
 )
@@ -19,7 +19,7 @@ type LinearLayout struct {
 	element.LayoutImpl
 
 	// The element's orientation
-	Orientation util.Orientation `uixml:"http://github.com/orfby/ui/api/schema orientation,optional"`
+	Orientation util.Orientation `uixml:"http://github.com/bhollier/ui/api/schema orientation,optional"`
 }
 
 // Function to create a new linear layout
@@ -31,7 +31,7 @@ func NewLinearLayout(fs http.FileSystem, name xml.Name, parent element.Layout) e
 }
 
 // The XML name of the element
-var LinearLayoutTypeName = xml.Name{Space: "http://github.com/orfby/ui/api/schema", Local: "LinearLayout"}
+var LinearLayoutTypeName = xml.Name{Space: "http://github.com/bhollier/ui/api/schema", Local: "LinearLayout"}
 
 // Function to unmarshal an XML element into
 // an element. This function is usually only

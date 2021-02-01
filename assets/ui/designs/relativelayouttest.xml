@@ -1,24 +1,25 @@
 <RelativeLayout
-        xmlns:builtin="http://github.com/orfby/ui/api/schema"
+        xmlns:builtin="http://github.com/bhollier/ui/api/schema"
         builtin:width="match_parent"
         builtin:height="match_parent"
-        builtin:background="./assets/ui/images/scalebkg-50px.png"
-        builtin:bkg-repeat="true">
+        builtin:background="images/scalebkg-50px.png"
+        builtin:bkg-scale="tiled">
     <Image
             builtin:id="img1"
-            builtin:width="100px"
+            builtin:width="match_bounds"
             builtin:height="100px"
-            builtin:gravity="center"
+            builtin:gravity="left"
+            builtin:right-of="parent"
             builtin:left-of="img2"
             builtin:source="#FF0000">
     </Image>
     <Image
             builtin:id="img2"
             builtin:width="100px"
-            builtin:height="100px"
+            builtin:height="150px"
             builtin:gravity="left"
-            builtin:right-of="img1"
-            builtin:background="#00000088"
-            builtin:source="#00FF00">
+            builtin:right-of="parent"
+            builtin:source="#00FF00"
+            builtin:scale="stretch">
     </Image>
 </RelativeLayout>
